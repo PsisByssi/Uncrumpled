@@ -1,0 +1,95 @@
+
+First User Guide 
+================
+
+Thank you for using Uncrumpled. We hope you have a good experience!
+
+* If you have not already installed the program see the :ref:`installation-guide`. 
+* Also a good read is the :ref:`what` and :ref:`why` of uncrumpled. 	
+* A useful reference is the :ref:`glossary-of-terms`.  
+
+
+Setting up Your First Workbook
+------------------------------
+
+1. Open the Program by clicking on the Uncrumpled main icon.
+2. Click cancel when you are prompted to view online documentation.
+
+Your are now in the relevant section for creating a new work book.
+ 
+Purpose of your first Workbook!
+*******************************
+Workbooks are a collection of Notes that are accessible via a shortcut key.
+This is particularly useful if we have program specific notes.
+
+I recommend all users should create there first work book as one that
+holds program related features. e.g.
+how to customise the application. Common shortcuts that you have not 
+yet mastered etc.
+
+As more features become avaliable in the program i will add a section for
+common design patterns for note taking.	
+
+.. note :: At this stage Uncrumpled has no options for changing this
+	default behavior of creating a new page per program.
+	This doesn't lend itself to taking notes on cooking for instance.
+	
+	Support for more general style notes will be coming soon. Head
+	over to the forums to have your say
+	
+	
+3. In the **Workbook name** field enter: *Program Usage* or similar 
+
+
+4. For the workbook archetype Select *Note* from the drop down list. 
+
+5. Click in the Shortcut Key field and press a desired shortcut key.
+
+To reset the shortcut key
+	* Wait 5 seconds and then press any key.
+	* Change focus to another field and click back
+	* Enter more than 3 keys
+
+.. attention :: A guide for selecting hotkeys and shortcuts will be publish in the future.
+	I recommend using F6 or F7.
+
+6. Hit the save button, you should see a thumbs up in the bottom right if everything
+is okay.
+
+.. tip :: Any time you do save or delete something, a confirmation or error messages will be displayed here!
+
+
+
+Creating and Testing Your First Pages
+-------------------------------------
+
+That's all the setting up we need to do. We can now navigate to a program and press our hotkey.
+
+1. Navigate to any program and press the hotkey that you defined when you set up your workbook.
+
+2. Type something nice for testing :)
+
+3. Close the page by either pressing your hotkey again, or pressing the Esc key
+
+4. Press your hotkey again to view the saved data
+
+Your data should now be displayed. If it isn't, you might have selected another program window.
+Make sure the same program is selected as when you created the page!
+
+5. Now Navigate to another program and repeat the process of adding data, closing and reopening
+
+6. Switch back to the first program and load your data.
+
+7. Go back to the second data and load your data.
+
+
+.. important :: This is the bread and butter of uncrumpled. This behaviour is extremely powerful.
+	It is optimised for mastering computer software. Any time you learn something new.
+	Write it down in your note, and it will be saved exactly where you need it.
+	With the program!
+
+Comments and Suggestions
+************************
+If you found this tutorial lacking on information please email suggestions@dynamicnotetaking.com
+
+

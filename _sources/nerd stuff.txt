@@ -1,0 +1,9 @@
+Nerd Stuff
+==========
+
+There are a lot of use cases that power users will beneift from.
+
+ - taking notes in the middle of games
+ - configuration options
+ - console commands
+ - programming and project notes

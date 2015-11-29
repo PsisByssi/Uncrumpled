@@ -1,0 +1,7 @@
+
+Settings
+========
+
+So far the program has no customizable features :(
+
+

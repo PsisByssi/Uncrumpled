@@ -1,0 +1,9 @@
+
+.. _downloads:
+
+Downloads
+==========
+
+:download:`Windows Installer<../repo/uncrumpled-0.1.exe>`
+
+

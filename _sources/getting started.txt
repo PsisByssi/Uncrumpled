@@ -1,0 +1,14 @@
+
+Getting Started
+===============
+
+
+.. toctree::
+	:maxdepth: 2
+	
+        what
+	why
+	installation
+	first user guide
+	changing hotkeys
+

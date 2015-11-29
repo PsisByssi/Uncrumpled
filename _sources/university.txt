@@ -1,0 +1,21 @@
+
+Typical Notetaking for University with Uncrumpled 
+==================================================
+
+Let us take the case of university.
+With university level courses its common to recieve task over the internet.
+
+A typical user might group the content by year or semester, and the course.
+You would of course then have your different files per week or perhaps as a soup in the folder.
+
+In uncrumpled, we have two organizaitonal tools to us, profiles and books.
+
+Profiles are a group of settings that i want to use. I may like to have different settings for learning, gaming, working etc.
+These settings would control what hotekys are avaliable and so on.
+
+In our university example our user start with creating a University profile. All he needs to do is set the name.
+Bob wants to start taking notes right away for his math class so he creates a new book and calls it problems.
+He decides alt f1 is a good key for his book, he wants a new note page to be created by default for all pdf files.
+
+After hitting save, bob only needs to make sure that he is using the university profile and hitting alt f1 will bring up his notes.
+Bob can now start creating

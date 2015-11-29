@@ -1,0 +1,27 @@
+
+.. _glossary-of-terms:
+
+Glossary of Terms
+=================
+
+
+**Profile**
+	A way to group and organise workbooks and notes. This is considered
+	the top tier. You can rewrite your entire settings by having a different
+	profile. 
+
+**Page** 
+	A Page is created using the rules defined in the workbook, as well as 
+	the Profile setting. You can think of a page as the file to a 
+	word processing program. Each time you want to store new information,
+	you need a page for that.
+
+**Work book**
+	A Collection of Notes, A workbook is what you connect with a hotkey.
+	Generally a workbook always displays Notes of the same widget type.
+
+**Work book archetype**
+	Workbooks come in different forms, these are refereed to as archetypes or
+	widgets. A Workbook may be a general note taking page or a full blown
+	project manager.
+

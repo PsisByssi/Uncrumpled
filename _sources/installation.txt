@@ -1,0 +1,15 @@
+
+.. _installation-guide:
+
+Installation Guide
+==================
+
+Unfortunately only a Windows version is available at the moment,
+Check back later for linux and mac versions.
+
+1. Download the package from our :ref:`downloads`
+
+2. After extracting the package follow the prompts for the installer.
+
+
+

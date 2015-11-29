@@ -1,0 +1,25 @@
+
+
+Changing Hotkeys and Viewing Pages
+==================================
+
+1. Open the Uncrumpled main User Interface
+2. On the left side you will see the icon below. Click it!.
+
+.. image :: img/main_edit_find_resize.png
+    :align: center
+	
+The book viewer will now be loaded on the right half of the screen.
+
+Click on the downard arrow to display the next level of items in the tree.
+
+3. To load a page, navigate to it in the tree and double click the name.
+
+4. To edit Workbook settings click on the workbook name. Change the
+Required settings on the right and press save.
+
+
+
+
+	
+

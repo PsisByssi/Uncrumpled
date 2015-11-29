@@ -1,0 +1,68 @@
+
+Archetype Info
+==============
+
+Check the :ref:`glossary-of-terms` if you are not sure what an archetype is.
+
+.. ~ .. important :: The Info on this page pertains to using Archetypes.
+.. ~ 	If you would like information on the settings that can be configured for
+.. ~ 	Archetypes in general go to the settings section
+
+.. ~ Select the Widget you want to know specific information about from the list below.
+
+
+General Archetype Properties
+----------------------------
+
+.. tip :: Archetypes provide the defaults for your created pages unless otherwise specified.
+
+
+**Archetype Behaviours.**
+
+==========  ===============  ================
+Action       Key              Alternative
+==========  ===============  ================
+Save        Ctrl + S
+Close       Esc               Workbook Hotkey
+ 
+Bold        Ctrl + B
+Italic      Ctrl + I  
+Underline   Ctrl + U     
+Undo        Ctrl + Z
+Redo        Ctrl + Y
+==========  ===============  ================
+
+* Automatic Saving
+
+
+**Workbook Settings.**
+
+==========  ===================================
+Setting       Effect        
+==========  ===================================
+Hotkey      what key is pressed to view the Book             
+
+==========  ===================================
+
+
+Notes
+-----
+
+The Note Archetype is very simple to use. It provides you with a simple
+text editor.
+
+Supported Features
+******************
+
+Text editing behaviour modelled from Open office.
+
+* Changing font style by selecting the text and then e.g Ctrl + B
+* Changing font style by clicking in the middle of a word and e.g Ctrl + B
+| 
+* Bold
+* Italic
+* Underline
+
+
+.. ~ 	table
+.. ~ 	project manager

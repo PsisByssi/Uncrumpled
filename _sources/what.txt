@@ -1,0 +1,19 @@
+
+.. _what:
+
+What
+====
+
+
+**An introduction**
+
+
+Uncrumpled is a note taking program that started in 2014. Uncrumpled (as it is now) focuses on note taking for improving your computer skills. You can think of it as your own personal help documentation. Think of those times you pressed F1 to view some help (perhaps while using internet explorer or some sort of text editing software), only now instead of seeing a five thousand page manual, you will be presented with your own notes relating to what you find uself. 
+
+Uncrumpled lets you bind a hotkey that will display a note page you can use to store a new note page for every program that you use.
+
+
+**Future Plans**
+Uncrumpled will be..
+
+

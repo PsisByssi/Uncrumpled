@@ -1,0 +1,47 @@
+.. Uncrumpled documentation master file, created by
+   sphinx-quickstart on Thu Nov 20 20:34:18 2014.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Uncrumpled's documentation!
+======================================
+
+
+**Contents:**
+
+.. toctree::
+	:maxdepth: 2
+	
+	getting started
+	archetype info
+ 	tutorials
+	glossary of terms
+ 	settings 
+        downloads
+
+.. ~`Back to the Uncrumpled Homepage <http:www.dynamicnotetaking.com>`_
+
+
+
+
+
+.. ~ .. attention :: yoyoyo
+.. ~ 
+.. ~ .. caution :: yoyoyo
+.. ~ 
+.. ~ 
+.. ~ .. warning :: yoyoyo
+.. ~ 
+.. ~ .. danger :: yoyoyo
+.. ~ 
+.. ~ .. error :: yoyoyo
+.. ~ 
+.. ~ .. hint :: yoyoyo
+.. ~ 
+.. ~ 
+.. ~ .. important :: yoyoyo
+.. ~ 
+.. ~ .. tip :: yoyoyo
+.. ~ 
+.. ~ 
+.. ~ .. note :: yoyoyo
