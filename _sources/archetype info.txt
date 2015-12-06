@@ -1,4 +1,5 @@
 
+
 Archetype Info
 ==============
 
@@ -17,7 +18,7 @@ General Archetype Properties
 .. tip :: Archetypes provide the defaults for your created pages unless otherwise specified.
 
 
-**Archetype Behaviours.**
+**Archetype Behaviors.**
 
 ==========  ===============  ================
 Action       Key              Alternative
@@ -54,7 +55,7 @@ text editor.
 Supported Features
 ******************
 
-Text editing behaviour modelled from Open office.
+Text editing behavior modeled from Open office.
 
 * Changing font style by selecting the text and then e.g Ctrl + B
 * Changing font style by clicking in the middle of a word and e.g Ctrl + B
@@ -66,3 +67,4 @@ Text editing behaviour modelled from Open office.
 
 .. ~ 	table
 .. ~ 	project manager
+

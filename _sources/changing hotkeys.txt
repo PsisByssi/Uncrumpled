@@ -11,7 +11,7 @@ Changing Hotkeys and Viewing Pages
 	
 The book viewer will now be loaded on the right half of the screen.
 
-Click on the downard arrow to display the next level of items in the tree.
+Click on the downward arrow to display the next level of items in the tree.
 
 3. To load a page, navigate to it in the tree and double click the name.
 

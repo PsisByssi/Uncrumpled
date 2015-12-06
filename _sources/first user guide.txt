@@ -5,7 +5,7 @@ First User Guide
 Thank you for using Uncrumpled. We hope you have a good experience!
 
 * If you have not already installed the program see the :ref:`installation-guide`. 
-* Also a good read is the :ref:`what` and :ref:`why` of uncrumpled. 	
+* Also a good read is the :ref:`what` and :ref:`why` of Uncrumpled. 	
 * A useful reference is the :ref:`glossary-of-terms`.  
 
 
@@ -24,10 +24,10 @@ This is particularly useful if we have program specific notes.
 
 I recommend all users should create there first work book as one that
 holds program related features. e.g.
-how to customise the application. Common shortcuts that you have not 
+how to customize the application. Common shortcuts that you have not 
 yet mastered etc.
 
-As more features become avaliable in the program i will add a section for
+As more features become available in the program i will add a section for
 common design patterns for note taking.	
 
 .. note :: At this stage Uncrumpled has no options for changing this
@@ -83,13 +83,11 @@ Make sure the same program is selected as when you created the page!
 7. Go back to the second data and load your data.
 
 
-.. important :: This is the bread and butter of uncrumpled. This behaviour is extremely powerful.
-	It is optimised for mastering computer software. Any time you learn something new.
+.. important :: This is the bread and butter of Uncrumpled. This behavior is extremely powerful.
+	It is optimized for mastering computer software. Any time you learn something new.
 	Write it down in your note, and it will be saved exactly where you need it.
 	With the program!
 
 Comments and Suggestions
 ************************
 If you found this tutorial lacking on information please email support@uncrumpled.com
-
-
