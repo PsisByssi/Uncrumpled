@@ -3,9 +3,11 @@
 Downloads
 ==========
 
-:download:`Windows Installer<../repo/uncrumpled-0.1.zip>`
+:download:`Windows Installer<../repo/uncrumpled-0.1.1.zip>`
 
 .. note :: If you receive a mscrv100.dll error while installing you will need to install the following from microsoft-> `2010 c++ redistributable x86 <https://www.microsoft.com/en-us/download/details.aspx?id=5555>`_
 
 
-.. note :: The installer is not signed (that shit costs money), so you will get a warning from Microsoft about the integrity of the developer being in question, do not worry it is not!
+.. note :: The installer is not signed , so you will get a warning from Microsoft about the integrity of the developer being in question, do not worry it is not!
+
+.. note :: Currently uninstallable on windows 8
