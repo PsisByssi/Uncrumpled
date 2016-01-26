@@ -3,7 +3,7 @@
 Downloads
 ==========
 
-:download:`Windows Installer<../repo/uncrumpled-0.1.1.zip>`
+:download:`Windows Installer<../repo/uncrumpled-0.1.2.zip>`
 
 .. note :: If you receive a mscrv100.dll error while installing you will need to install the following from microsoft-> `2010 c++ redistributable x86 <https://www.microsoft.com/en-us/download/details.aspx?id=5555>`_
 
