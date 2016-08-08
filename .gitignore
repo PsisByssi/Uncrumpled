@@ -1,0 +1,18 @@
+.idea/
+*.pyc
+*~
+*.ini
+dist/
+repo/
+data^-^/
+zipped src
+.cache
+*.log
+*.xml
+*.db
+*.cfg
+*.*prof
+*.egg-info/
+build/
+tags
+
