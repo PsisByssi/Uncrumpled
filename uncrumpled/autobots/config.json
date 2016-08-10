@@ -1,0 +1,18 @@
+{
+  "app_name": "uncrumpled",
+  "config_file": "state.cfg",
+  "log_file": "",
+
+  "log_module": "logging",
+  "log_server_host": "ftp.jak101.ipage.com",
+  "log_server_username": "timeyyy",
+  "log_server_password": "cGVuMTUh",
+  "log_server_port": 2222,
+  "log_server_method": "sftp",
+  "log_server_interface": "background",
+
+  "raven_dsn": "https://ff22ab27c48542899a344a64e4c2718d:239dd27477154b7886632c113d16b2dd@app.getsentry.com/63184",
+  "raven_loglevel": "WARNING",
+
+  "esky_update_url": "https://github.com/PsisByssi/Uncrumpled/tree/gh-pages/_downloads"
+}
