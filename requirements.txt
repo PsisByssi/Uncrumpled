@@ -1,0 +1,9 @@
+Pillow
+psutil
+ipython
+pyreadline
+pysftp
+raven
+pyautogui
+pytest
+halt

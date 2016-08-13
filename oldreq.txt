@@ -1,0 +1,11 @@
+Pillow
+psutil
+cx-freeze 
+pysftp
+peasoup
+tkquick
+tttt
+timstools
+pypiwin32 --allow-external pypiwin32
+system_hotkey --allow-external pywin32
+system_tray --allow-external pywin32
