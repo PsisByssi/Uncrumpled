@@ -29,6 +29,20 @@ def profile_delete(core, profile):
 
 
 @uncrumpled_request
+def profile_set_active(core, profile):
+    request = jsonify('profile_set_active', profile=profile)
+    response = core.request(request)
+    return response
+
+
+@uncrumpled_request
+def profile_get_active(core):
+    request = jsonify('profile_get_active')
+    response = core.request(request)
+    return response
+
+
+@uncrumpled_request
 def ui_init(core):
     request = jsonify('ui_init')
     response = core.request(request)

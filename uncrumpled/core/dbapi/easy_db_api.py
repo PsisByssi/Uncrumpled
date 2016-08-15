@@ -375,25 +375,6 @@ def delete_page(profile, bookname, program, specific, db=None):
     condition = "where Name == '{0}'".format(pagename)
     dbtools.deleteIt('Pages', condition, db=db)
 
-def all_pages(address=True, db=None):
-    '''
-    return eith as address
-    or profile book, program, program, specific
-    '''
-    columns = 'Bookname,Program,Profile,SpecificName'
-    cur = dbtools.loadItColumn(column=columns,
-                               table='Pages',
-                               db=db)
-    if address:
-        for row in cur.fetchall():
-            Bookname, Program, Profile, SpecificName = row
-            yield make_page_address(
-                    Profile, Bookname, Program, SpecificName)
-    else:
-        for row in cur.fetchall():
-            Bookname, Program, Profile, SpecificName = row
-            yield Profile, Bookname, Program, SpecificName
-
 
 def all_books(widgettype=True, db=None):
     '''

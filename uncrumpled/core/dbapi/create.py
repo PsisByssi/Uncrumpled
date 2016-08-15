@@ -38,11 +38,7 @@ def new_db(database):
                                            Active Integer,
                                            MashConfig Text)""")
 
-        cur.execute("""CREATE TABLE WidgetTypes(Name Text UNIQUE,
-                                              ClassName Text)""")
-
         cur.execute("""CREATE TABLE Books(Name Text ,
-                                        WidgetType Text,
                                         Book Text,
                                         Profile Text,
                                         MashConfig Text)""")
@@ -52,19 +48,10 @@ def new_db(database):
                                   Program Text,
                                   Profile Text,
                                   SpecificName Text,
-                                  PathToLoad Text,
                                   Symlink Text,
                                   MashConfig Text)""")
 
         cur.execute("CREATE UNIQUE INDEX hotkey_name ON Hotkeys(Profile, Hotkey)")
-
-        # cur.executemany("""
-        # INSERT INTO WidgetTypes ('Name','ClassName')
-        # VALUES (?,?)""", [('Note','Notes'),('Table','Hotkeys')])#,('Slider','AppSlider')])
-
-        cur.executemany("""
-				INSERT INTO WidgetTypes ('Name','ClassName')
-				VALUES (?,?)""", [('Note', 'Notes')])  # ,('Slider','AppSlider')])
 
         cur.execute("INSERT INTO Profiles ('Name') VALUES ('default')")
         cur.execute("INSERT INTO DefaultOptions ('Name') VALUES ('user')")

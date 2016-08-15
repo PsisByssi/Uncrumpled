@@ -40,7 +40,7 @@ class Uncrumpled(MyAppBuilder):
             logging.info('Database file detected!: %s' % self.db)
 
         os.chdir(os.path.dirname(kivygui.__file__))
-        self.core = core.Core(self.db)
+        self.core = core.Core(self.db, main_file=self.main_file)
         self.gui = kivygui.KivyGui()
         self.gui.start(self.core)
 

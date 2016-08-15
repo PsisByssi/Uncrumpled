@@ -1,24 +1,24 @@
 
-from uncrumpled.core.util import resp_status, resp_noop
-from uncrumpled.core.profile import profile_get_active
-from uncrumpled.core.profile import profile_set_active
+import logging
+
+from uncrumpled.core import responses as resp
+from uncrumpled.core import requests as req
 # from uncrumpled.core.profile import load_hotkeys
 
 
-def ui_init(core, user_or_token, password):
+def ui_init(core, user_or_token=None, password=None):
     '''
     Code for startup
     '''
-    core.create_cfg(core.pcfg['config_file'])
     logging.info('first time ?-> :' + str(core.first_run))
     if core.first_run:
-        yield resp('show_window')
-        yield resp('welcome_screen')
+        yield resp.resp('show_window')
+        yield resp.resp('welcome_screen')
     # if data.get('new_user'):
         # yield config.new_user(data)
     # yield config.ui_config()
-    profile = profile_get_active(core)
-    yield profile_set_active(core, profile)
-    # load_hotkeys(core, profile)
+    profile = req.profile_get_active(core)
+    yield req.profile_set_active(core, profile)
+    yield req.hotkeys_reload(core, profile)
 
 

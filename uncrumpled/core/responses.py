@@ -1,7 +1,13 @@
 
-CORE_API = ('profile_create', 'profile_delete')
+# this should be in requests
+CORE_API = ('profile_create', 'profile_delete',
+            'profile_set_active', 'profile_get_active',
+            'hotkeys_get_all')
 
-_msg = {'missing_param': 'Missing parameter: {profile}',
+_msg = {'book_taken': 'Book name already used for this configuration',
+        'book_created': 'Book created: {book}',
+        'hotkey_taken': 'Hotkey already used for this configuration',
+        'hotkey_missing': 'A hotkey is required',
         'profile_taken': 'Profile already in use: {profile}',
         'profile_created': 'Profile created: {profile} ',
         'profile_deleted': 'Profile deleted: {profile}',
@@ -24,14 +30,15 @@ def status(key, code, template):
 
 
 _noop = ('profile_gotten',
+         'hotkeys_reloaded'
         )
 
 # no operation
-def noop(key, **data):
+def noop(key):
     assert key in _noop, 'Add the key to noop ' + key
-    return dict({'output_method': 'noop', 'key': key}, **data)
+    return {'output_method': 'noop', 'key': key}
 
-# programmer error
+# programmer error  TODO DEL
 def prog_err(msg, **data):
     return dict({'output_method': 'programmer_error',
                 'msg': msg})

@@ -25,12 +25,15 @@ def profile_delete(core, profile):
                            template={'profile': profile})
 
 
+def profile_get_active(core):
+    dbapi.profile_get_active(core.db)
+    return resp.noop(key='profile_gotten')
+
+
 def profile_set_active(core, profile):
+    dbapi.profile_set_active(core.db, profile)
     return resp.status(key='profile_changed',
                        code=1,
                        template={'profile': profile})
 
 
-def profile_get_active(core, profile):
-    return resp.noop(key='profile_gotten',
-                     data={'profile': profile})

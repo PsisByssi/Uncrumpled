@@ -51,3 +51,8 @@ class TestPresenter():
         response = self.run(lambda: req.profile_delete(self.core, profile))
         assert 'profile does not exist' in response.lower()
 
+        # not sure if we need to expose these..
+        # assert not self.run(lambda: req.profile_get_active(self.core))
+        # assert not self.run(lambda: req.profile_set_active(self.core))
+
+

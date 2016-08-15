@@ -2,17 +2,16 @@
 import os
 import asyncio
 
-import peasoup
-
 from uncrumpled.core import responses
 from uncrumpled.core import requests
 from uncrumpled.core import dbapi
 
 
-class Core(peasoup.AppBuilder):
+class Core():
     def __init__(self, db):
         self.db = db
         self.messages = asyncio.Queue()
+        # self.active_profile = requests.profile_get_active(self)
 
     # @asyncio.coroutine #ASYNC
     def request(self, data):
@@ -34,7 +33,7 @@ class Core(peasoup.AppBuilder):
         method = data['input_method']
         kwargs = data['input_kwargs']
         if method not in responses.CORE_API:
-            return responses.prog_err('Function not supported by core: "{}"'.format(method))
+            raise Exception('Function not supported by core, add to CORE_API')
         else:
             output_response = eval('requests.'+method+'(self, **kwargs)')
             return dict(output_response, **data) # TODO this should never override

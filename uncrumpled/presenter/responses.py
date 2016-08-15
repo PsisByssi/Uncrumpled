@@ -27,7 +27,7 @@ class ResponseHandler():
         '''
         method = self.response.get('output_method')
 
-        if not method:
+        if not method or method == 'noop':
             return
         elif method not in UI_API:
             raise Exception('method not supported by UI: ' + method)
@@ -36,7 +36,6 @@ class ResponseHandler():
 
 
 class BindAdd(ResponseHandler):
-
     def add_to_system(self):
         event_type = self.response['event_type']
         hk = self.response['hotkey']
@@ -60,7 +59,6 @@ class BindAdd(ResponseHandler):
 
 
 class BindRemove(ResponseHandler):
-
     def add_to_system(self):
         event_type = self.response['event_type']
         hk = self.response['hotkey']
@@ -73,13 +71,20 @@ class BindRemove(ResponseHandler):
 
 
 class ProfileCreate(ResponseHandler):
-
     def add_to_system(self):
         self.system['profiles'].append(self.response['input_kwargs']['profile'])
 
 
 class ProfileDelete(ResponseHandler):
-
     def add_to_system(self):
         self.system['profiles'].append(self.response['input_kwargs']['profile'])
 
+
+class ProfileSetActive(ResponseHandler):
+    def add_to_system(self):
+        pass
+
+
+class ProfileGetActive(ResponseHandler):
+    def add_to_system(self):
+        pass
