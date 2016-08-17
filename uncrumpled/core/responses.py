@@ -10,6 +10,12 @@ _msg = {'book_taken': 'Book already used for this configuration',
         'book_not_found': 'Book does not exist: {book}',
         'hotkey_taken': 'Hotkey already used for this configuration',
         'hotkey_missing': 'A hotkey is required',
+        'page_taken': 'Page already in use!',
+        'page_created': 'Page created!',
+        'page_updated': 'Page saved!',
+        'page_not_found': 'Page does not exist!',
+        'page_deleted': 'Page deleted!',
+        'page_not_found': 'Page does not exist!',
         'profile_taken': 'Profile already in use: {profile}',
         'profile_created': 'Profile created: {profile} ',
         'profile_deleted': 'Profile deleted: {profile}',
@@ -35,7 +41,7 @@ def status(key, code, template=None):
 
 
 _noop = ('profile_gotten',
-         'hotkeys_reloaded'
+         'hotkeys_reloaded',
         )
 
 # no operation

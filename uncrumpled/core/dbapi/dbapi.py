@@ -1,11 +1,14 @@
 '''
     talks to sql db using halt
 '''
+
 import sqlite3
 from contextlib import suppress
 import json
 
 import halt
+
+from uncrumpled.core.dbapi import util
 
 class CreateWorkBookError(Exception): pass
 class NoHotkeyError(CreateWorkBookError): pass
@@ -73,9 +76,6 @@ def book_delete(db, book, profile):
     cond = "where Book == '{0}' and Profile == '{1}'"\
                     .format(book, profile)
     halt.delete(db, 'Books', cond)
-
-    # cond = "where Book == '{0}' and Profile =='{1}'"\
-                    # .format(bookname, profile)
     halt.delete(db, 'Hotkeys', cond)
     halt.delete(db, 'Pages', cond)
     # Remember to Update values that other colums depend on first
@@ -96,52 +96,65 @@ def hotkey_get_all(db, profile):
     return hotkeys
 
 
-def _page_save(profile, book, program, specific):
-    assert type(program) in (list, tuple)
+def _page_save(profile, book, program, specific, loose):
     to_save = {
         'Profile': profile,
         'Book': book,
         'Program': program,
         'Symlink': None,
-        'SpecificName': specific,
+        'Specific': specific,
+        'Loose': loose,
     }
 
     if specific is None:
         specific = ''
     if program is None:
         program = ''
+    if loose is None:
+        loose = ''
 
-    name = book + program[0] + profile + specific # TODO improve this
-    cond = "where Name == '{0}'".format(name)
-    return to_save, cond
-
-
-def page_create(db, profile, book, program, specific):
-    to_save, cond = _page_save(profile, book, program, specific)
-    halt.insert(db, 'Pages', to_save, mash=False, commit=True)
+    name = book + program + profile + specific + loose
+    to_save['Name'] = name
+    return to_save
 
 
-def page_update(db, profile, book, program, specific):
-    to_save, cond = _page_save(profile, book, program, specific)
-    halt.update(db, 'Pages', to_save, mash=False, commit=True)
+def page_create(db, profile, book, program, specific, loose):
+    to_save = _page_save(profile, book, program, specific, loose)
+    try:
+        halt.insert(db, 'Pages', to_save, mash=False, commit=True)
+    except halt.HaltException:
+        return False
+    return True
 
 
-def page_get_all(db, address=True):
+def page_update(db, profile, book, program, specific, loose):
+    page = (profile, book, program, specific, loose)
+    to_save = _page_save(profile, book, program, specific, loose)
+    if page in page_get_all(db):
+        cond = util.page_select(*page)
+        halt.update(db, 'Pages', to_save, cond=cond, mash=False)
+        return True
+    return False
+
+
+def page_delete(db, profile, book, program, specific, loose):
+    page = (profile, book, program, specific, loose)
+    if page in page_get_all(db):
+        cond = util.page_select(*page)
+        halt.delete(db, 'Pages', cond)
+        return True
+    return False
+
+
+def page_get_all(db):
     '''
     return eith as address
-    or profile book, program, program, specific
+    or profile book, program, program, specific, loose
     '''
-    columns = ('Book', 'Program', 'Profile', 'SpecificName')
+    columns = ('Profile', 'Book', 'Program', 'Specific', 'Loose')
     results = halt.load_column(db, 'Pages', columns)
-    if address:
-        for row in results:
-            Book, Program, Profile, SpecificName = row
-            yield make_page_address(
-                    Profile, Book, Program, SpecificName)
-    else:
-        for row in results:
-            Book, Program, Profile, SpecificName = row
-            yield Profile, Book, Program, SpecificName
+    for row in results:
+        yield row
 
 
 def profile_create(db, name):

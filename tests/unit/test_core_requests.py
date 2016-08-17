@@ -1,6 +1,11 @@
 '''
     Tests requests against the core
+
+    We only check the messages are correct,
+    There are a few asserts for database stuff but those
+    should be deleted if i need to do some db tests
 '''
+
 import asyncio
 import tempfile
 import os
@@ -36,7 +41,6 @@ class MixIn():
         dbapi.new_db(self.core.db)
 
 
-@pytest.mark.working
 class TestProfile(MixIn):
     def test_profile_create(self):
         response = req.profile_create(self.core, 'new')
@@ -77,6 +81,7 @@ class TestProfile(MixIn):
         test_active = halt.load_column(self.core.db, 'Profiles', ('Active',), cond)
         assert test_active[0][0]
 
+
 class TestBook(MixIn):
     active_profile = 'default'
     profile = 'test profile'
@@ -113,7 +118,6 @@ class TestBook(MixIn):
         assert response['output_kwargs']['code'] != 1
 
 
-    @pytest.mark.here
     def test_book_delete(self):
         response = req.book_delete(self.core, 'bad_book', self.profile)
         assert 'does not exist' in response['output_kwargs']['msg'].lower()
@@ -133,13 +137,70 @@ class TestBook(MixIn):
         assert response['output_kwargs']['code'] != 1
 
 
+@pytest.mark.here
 class TestPage(MixIn):
     page = 'testpage'
+    profile = 'test profile'
     program = 'testprogram'
     book = 'Note'
 
     def test_page_create(self):
-        response = req.page_create(self.core, 'new')
+        specific = None;
+        response = req.page_create(self.core, self.profile, self.book,
+                                   self.program, specific)
+        assert 'page created' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] == 1
+        data = get_all_data(self.core.db, 'Pages')[0]
+        assert data[1] == self.profile
+        assert data[2] == self.book
+        assert data[3] == self.program
+
+        response = req.page_create(self.core, self.profile, self.book,
+                                   self.program, specific)
+        assert 'page already' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
+
+    def test_page_delete(self):
+        specific = None; loose = None
+        response = req.page_delete(self.core, self.profile, self.book,
+                                    'bad_page', specific, loose)
+        assert 'does not exist' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
+
+        response = req.page_create(self.core, self.profile, self.book,
+                                   self.program, specific)
+
+
+        response = req.page_delete(self.core, self.profile, self.book,
+                                    self.program, specific, loose)
+        assert 'page deleted' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] == 1
+        data = get_all_data(self.core.db, 'Pages')
+        assert not data
+
+        response = req.page_delete(self.core, self.profile, self.book,
+                                    self.program, specific, loose)
+        assert 'does not exist' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
+
+    def test_page_update(self):
+        specific = None; loose = None
+        response = req.page_update(self.core, self.profile, self.book,
+                                    'bad_page', specific, loose)
+        assert 'does not exist' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
+
+        response = req.page_create(self.core, self.profile, self.book,
+                                   self.program, specific)
+
+        response = req.page_update(self.core, self.profile, self.book,
+                                   self.program, specific)
+        assert 'page saved' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] == 1
+        data = get_all_data(self.core.db, 'Pages')[0]
+        assert data[1] == self.profile
+        assert data[2] == self.book
+        assert data[3] == self.program
 
 
 class TestHotkeys(MixIn):

@@ -46,13 +46,16 @@ def new_db(database):
         cur.execute(
             "CREATE UNIQUE INDEX book_name ON Books(Profile, Book)")
 
-        cur.execute("""CREATE TABLE Pages(Name Text UNIQUE,
-                                  Book Text,
-                                  Program Text,
-                                  Profile Text,
-                                  SpecificName Text,
-                                  Symlink Text,
-                                  MashConfig Text)""")
+        cur.execute("""CREATE TABLE Pages(Name Text UNIQUE not null,
+                                          Profile Text not null,
+                                          Book Text not null,
+                                          Program Text,
+                                          Specific Text,
+                                          Loose Text,
+                                          Symlink Text,
+                                          MashConfig Text)""")
+        cur.execute(
+            "CREATE UNIQUE INDEX page_name ON Pages(Profile, Book, Program)")
 
         cur.execute("INSERT INTO Profiles ('Name') VALUES ('default')")
         cur.execute("INSERT INTO DefaultOptions ('Name') VALUES ('user')")
