@@ -1,5 +1,5 @@
 from uncrumpled.core.dbapi.dbapi import book_create
-from uncrumpled.core.dbapi.dbapi import book_create
+from uncrumpled.core.dbapi.dbapi import book_delete
 from uncrumpled.core.dbapi.dbapi import CreateWorkBookError
 from uncrumpled.core.dbapi.dbapi import NoHotkeyError
 from uncrumpled.core.dbapi.dbapi import UniqueNameError

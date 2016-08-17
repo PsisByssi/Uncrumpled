@@ -4,8 +4,10 @@ CORE_API = ('profile_create', 'profile_delete',
             'profile_set_active', 'profile_get_active',
             'hotkeys_get_all')
 
-_msg = {'book_taken': 'Book name already used for this configuration',
+_msg = {'book_taken': 'Book already used for this configuration',
         'book_created': 'Book created: {book}',
+        'book_deleted': 'Book deleted: {book}',
+        'book_not_found': 'Book does not exist: {book}',
         'hotkey_taken': 'Hotkey already used for this configuration',
         'hotkey_missing': 'A hotkey is required',
         'profile_taken': 'Profile already in use: {profile}',
@@ -15,14 +17,17 @@ _msg = {'book_taken': 'Book name already used for this configuration',
         'profile_changed': 'Profile changed: {profile}',
         }
 
-def status(key, code, template):
+def status(key, code, template=None):
     '''
     update the status bar
     :code: 0 or 1 for fail or success
     '''
     msg = _msg.get(key)
     assert msg != None, 'add the message to _msg dict: ' + key
-    msg = msg.format(**template)
+
+    if template:
+        msg = msg.format(**template)
+
     to_send = dict({'output_method': 'status_update',
                     'output_kwargs': {'msg': msg, 'code': code},
                     })

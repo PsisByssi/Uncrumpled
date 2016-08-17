@@ -30,28 +30,29 @@ def new_db(database):
                                                  """)
 
         cur.execute("""CREATE TABLE Hotkeys(Profile Text,
-                                          Bookname Text,
-                                          Hotkey Text,
+                                          Book Text not null,
+                                          Hotkey Text not null,
                                           MashConfig Text)""")
+        cur.execute(
+            "CREATE UNIQUE INDEX hotkey_name ON Hotkeys(Profile, Hotkey)")
 
-        cur.execute("""CREATE TABLE Profiles(Name Text PRIMARY KEY,
+        cur.execute("""CREATE TABLE Profiles(Name Text UNIUQE,
                                            Active Integer,
                                            MashConfig Text)""")
 
-        cur.execute("""CREATE TABLE Books(Name Text ,
-                                        Book Text,
-                                        Profile Text,
+        cur.execute("""CREATE TABLE Books(Book Text not null,
+                                        Profile Text not null,
                                         MashConfig Text)""")
+        cur.execute(
+            "CREATE UNIQUE INDEX book_name ON Books(Profile, Book)")
 
         cur.execute("""CREATE TABLE Pages(Name Text UNIQUE,
-                                  Bookname Text,
+                                  Book Text,
                                   Program Text,
                                   Profile Text,
                                   SpecificName Text,
                                   Symlink Text,
                                   MashConfig Text)""")
-
-        cur.execute("CREATE UNIQUE INDEX hotkey_name ON Hotkeys(Profile, Hotkey)")
 
         cur.execute("INSERT INTO Profiles ('Name') VALUES ('default')")
         cur.execute("INSERT INTO DefaultOptions ('Name') VALUES ('user')")

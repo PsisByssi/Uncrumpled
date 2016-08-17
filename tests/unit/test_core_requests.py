@@ -11,11 +11,14 @@ import halt
 
 from uncrumpled.core import requests as req
 from uncrumpled.core import dbapi, Core
+from util import get_all_data
 
 # from uncrumpled.main import MyAppBuilder
 class MixIn():
     def setup_class(cls):
         cls.tdir = tempfile.mkdtemp()
+        # cls.db = os.path.join(cls.tdir, 'test.db')
+        # dbapi.new_db(cls.db)
         cls.core = Core(db='')
         cls.event_loop = asyncio.get_event_loop()
 
@@ -33,6 +36,7 @@ class MixIn():
         dbapi.new_db(self.core.db)
 
 
+@pytest.mark.working
 class TestProfile(MixIn):
     def test_profile_create(self):
         response = req.profile_create(self.core, 'new')
@@ -64,22 +68,69 @@ class TestProfile(MixIn):
         assert response['output_kwargs']['code'] == 1
 
         response = req.profile_get_active(self.core)
-        with pytest.raises(KeyError):
-            response['output_kwargs']['msg']
-        cond = "where Name == '{}'".format(profile)
+        abc = response
+        response['output_method'] == 'noop'
+        cond = "where Name == '{}'".format('default')
         default_active = halt.load_column(self.core.db, 'Profiles', ('Active',), cond)
         assert not default_active[0][0]
+        cond = "where Name == '{}'".format(profile)
+        test_active = halt.load_column(self.core.db, 'Profiles', ('Active',), cond)
+        assert test_active[0][0]
 
-@pytest.mark.here
 class TestBook(MixIn):
     active_profile = 'default'
     profile = 'test profile'
     book = 'test book'
     hotkey = ['f5']
-    def test_book_create(self):
+
+    def setup_method(self, func):
+        super().setup_method(func)
         req.profile_create(self.core, self.profile)
+
+    def test_book_create(self):
         response = req.book_create(self.core, self.profile, self.book,
                                    self.hotkey, self.active_profile)
+        assert 'book created' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] == 1
+        data = get_all_data(self.core.db, 'Books')[0]
+        assert data[0] == self.book
+        assert data[1] == self.profile
+
+        response = req.book_create(self.core, self.profile, self.book,
+                                   self.hotkey, self.active_profile)
+        assert 'book already' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
+
+        book2 = 'asdf'
+        response = req.book_create(self.core, self.profile, book2,
+                                   self.hotkey, self.active_profile)
+        assert 'hotkey already' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
+
+        response = req.book_create(self.core, self.profile, book2,
+                                   '', self.active_profile)
+        assert 'hotkey is required' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
+
+
+    @pytest.mark.here
+    def test_book_delete(self):
+        response = req.book_delete(self.core, 'bad_book', self.profile)
+        assert 'does not exist' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
+
+        response = req.book_create(self.core, self.profile, self.book,
+                                   self.hotkey, self.active_profile)
+
+        response = req.book_delete(self.core, self.book, self.profile)
+        assert 'book deleted' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] == 1
+        data = get_all_data(self.core.db, 'Books')
+        assert not data
+
+        response = req.book_delete(self.core, self.book, self.profile)
+        assert 'does not exist' in response['output_kwargs']['msg'].lower()
+        assert response['output_kwargs']['code'] != 1
 
 
 class TestPage(MixIn):

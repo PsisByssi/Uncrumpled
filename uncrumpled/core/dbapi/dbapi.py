@@ -1,6 +1,9 @@
 '''
     talks to sql db using halt
 '''
+import sqlite3
+from contextlib import suppress
+import json
 
 import halt
 
@@ -10,7 +13,7 @@ class UniqueNameError(CreateWorkBookError): pass
 class UniqueHotkeyError(CreateWorkBookError): pass
 
 
-def book_create(db, book, profile, hotkey=None, **kwargs):
+def book_create(db, profile, book, hotkey, **kwargs):
     '''
     For creating a new workbook, NOT updating one
 
@@ -27,56 +30,60 @@ def book_create(db, book, profile, hotkey=None, **kwargs):
     '''
     cond = "where Name = 'System Default'"
     options = halt.load_column(db, 'DefaultOptions', ('MashConfig',), cond)
-    options = halt.objectify(options)
-
+    options = halt.objectify(options[0][0])
     for k, v in kwargs.items():
         if k not in options:
-            raise KeyError(k + 'not recognized, add a default first to dbcreate.py')
+            raise KeyError(k + 'not recognized, add a default first to dbapi.py')
         else:
             options[k] = v
+
+    options['Book'] = book
+    options['Profile'] = profile
+
     try:
         # i am doing 2 seperate queries that depend on each other
         # the cur is only commited at the end so i dont have to undo anythin on
         # a fail
-        con = halt.insert(db, 'Books', options, mash=True, commit=False)
         if hotkey:
-            assert type(hotkey) != str
-            _add_hotkey(hotkey, profile, bookname, con)
+            con = halt.insert(db, 'Books', options, mash=True, commit=False)
+            _add_hotkey(db, hotkey, profile, book, con)
             con.commit()
         else:
             raise NoHotkeyError
-    except sqlite3.IntegrityError as err:
+    except halt.HaltException:
         raise UniqueNameError('Name for that widget already exists!')
     finally:
         with suppress(UnboundLocalError):
             con.close()
 
 
-def _add_hotkey(full_hotkey, profile, bookname, con=None):
-    hk_options = {'Hotkey': full_hotkey, 'Profile': profile, 'Bookname': bookname}
+def _add_hotkey(db, hotkey, profile, book, con=None):
+    assert type(hotkey) in (tuple, dict, list)
+    hotkey = json.dumps(hotkey)
+    options = {'Hotkey': hotkey, 'Profile': profile, 'Book': book}
     try:
-        halt.insert(db, 'Hotkeys', hk_options, con=con)
-    except sqlite3.IntegrityError as err:
+        halt.insert(db, 'Hotkeys', options, con=con)
+    except halt.HaltException as err:
         raise UniqueHotkeyError(str(err))
 
 
-def book_delete(db, book):
-    # Close any open windows # TODO
-    # for note in note_references.values():
-    # if note.page.Bookname == bookname:
-    # note.toplevel.destroy()
-    cond = "where Name == '{0}' and Profile == '{1}'"\
-                    .format(bookname, profile)
-    halt.delete('db', 'Books', cond)
+def book_delete(db, book, profile):
+    if book not in book_get_all(db):
+        return False
+    cond = "where Book == '{0}' and Profile == '{1}'"\
+                    .format(book, profile)
+    halt.delete(db, 'Books', cond)
 
-    cond = "where Bookname == '{0}' and Profile =='{1}'"\
-                    .format(bookname, profile)
+    # cond = "where Book == '{0}' and Profile =='{1}'"\
+                    # .format(bookname, profile)
     halt.delete(db, 'Hotkeys', cond)
     halt.delete(db, 'Pages', cond)
     # Remember to Update values that other colums depend on first
+    return True
+
 
 def book_get_all(db):
-    results = dbtools.load_column(db, 'Books', 'Name')
+    results = halt.load_column(db, 'Books', ('Book',))
     return [x[0] for x in results]
 
 
@@ -93,7 +100,7 @@ def _page_save(profile, book, program, specific):
     assert type(program) in (list, tuple)
     to_save = {
         'Profile': profile,
-        'Bookname': book,
+        'Book': book,
         'Program': program,
         'Symlink': None,
         'SpecificName': specific,
@@ -124,17 +131,17 @@ def page_get_all(db, address=True):
     return eith as address
     or profile book, program, program, specific
     '''
-    columns = ('Bookname', 'Program', 'Profile', 'SpecificName')
+    columns = ('Book', 'Program', 'Profile', 'SpecificName')
     results = halt.load_column(db, 'Pages', columns)
     if address:
         for row in results:
-            Bookname, Program, Profile, SpecificName = row
+            Book, Program, Profile, SpecificName = row
             yield make_page_address(
-                    Profile, Bookname, Program, SpecificName)
+                    Profile, Book, Program, SpecificName)
     else:
         for row in results:
-            Bookname, Program, Profile, SpecificName = row
-            yield Profile, Bookname, Program, SpecificName
+            Book, Program, Profile, SpecificName = row
+            yield Profile, Book, Program, SpecificName
 
 
 def profile_create(db, name):
