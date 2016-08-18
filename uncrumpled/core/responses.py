@@ -41,18 +41,19 @@ def status(key, code, template=None):
 
 
 _noop = ('profile_gotten',
-         'hotkeys_reloaded',
+         'system_hotkey_register',
+         'system_hotkey_unregister',
+         'hotkey_created',
+         'hotkey_taken',
+         'hotkey_deleted',
+         'hotkey_not_found',
+         'hotkey_updated',
         )
 
-# no operation
-def noop(key):
+# no operation on the ui, system operations are allowed
+def noop(key, **data):
     assert key in _noop, 'Add the key to noop ' + key
-    return {'output_method': 'noop', 'key': key}
-
-# programmer error  TODO DEL
-def prog_err(msg, **data):
-    return dict({'output_method': 'programmer_error',
-                'msg': msg})
+    return dict(data, **{'output_method': 'noop', 'key': key, })
 
 
 _UI = ('show_window', 'welcome_screen')

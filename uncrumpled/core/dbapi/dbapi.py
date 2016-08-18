@@ -50,7 +50,7 @@ def book_create(db, profile, book, hotkey, **kwargs):
         if hotkey:
             con = halt.insert(db, 'Books', options, mash=True, commit=False)
             _add_hotkey(db, hotkey, profile, book, con)
-            con.commit()
+            con.commit() # TODO delete
         else:
             raise NoHotkeyError
     except halt.HaltException:
@@ -61,11 +61,12 @@ def book_create(db, profile, book, hotkey, **kwargs):
 
 
 def _add_hotkey(db, hotkey, profile, book, con=None):
-    assert type(hotkey) in (tuple, dict, list)
+    assert type(hotkey) == list
     hotkey = json.dumps(hotkey)
     options = {'Hotkey': hotkey, 'Profile': profile, 'Book': book}
     try:
         halt.insert(db, 'Hotkeys', options, con=con)
+        import pdb;pdb.set_trace()
     except halt.HaltException as err:
         raise UniqueHotkeyError(str(err))
 
@@ -85,6 +86,37 @@ def book_delete(db, book, profile):
 def book_get_all(db):
     results = halt.load_column(db, 'Books', ('Book',))
     return [x[0] for x in results]
+
+
+def hotkey_create(db, profile, book, hotkey):
+    try:
+        con = sqlite3.connect(db)
+        _add_hotkey(db, hotkey, profile, book)
+        con.commit()
+    except UniqueHotkeyError:
+        return False
+    else:
+        return True
+    finally:
+        with suppress(UnboundLocalError):
+            con.close()
+
+
+def hotkey_delete(db, profile, book, hotkey):
+    if hotkey in hotkey_get_all(db, profile):
+        cond = "WHERE Profile=='{}' AND Book=='{}'".format(profile, book)
+        halt.delete(db, 'Hotkeys', cond)
+        return True
+    return False
+
+
+def hotkey_update(db, profile, book, hotkey):
+    if hotkey in hotkey_get_all(db, profile):
+        to_update={'Profile': profile, 'Book': book, 'Hotkey': hotkey}
+        cond = "WHERE Profile=='{}' AND Book=='{}'".format(profile, book)
+        halt.update(db, 'Hotkeys', to_save, cond=cond)
+        return True
+    return False
 
 
 def hotkey_get_all(db, profile):

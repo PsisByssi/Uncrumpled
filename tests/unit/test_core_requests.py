@@ -137,7 +137,6 @@ class TestBook(MixIn):
         assert response['output_kwargs']['code'] != 1
 
 
-@pytest.mark.here
 class TestPage(MixIn):
     page = 'testpage'
     profile = 'test profile'
@@ -204,9 +203,52 @@ class TestPage(MixIn):
 
 
 class TestHotkeys(MixIn):
+    profile = 'a profile'
+    book = 'abook'
+    hotkey = ['f5']
+
+    def test_hotkey_create(self):
+        response = req.hotkey_create(self.core, self.profile, self.book,
+                                     self.hotkey)
+        assert 'created' in response['key']
+
+        response = req.hotkey_create(self.core, self.profile, self.book,
+                                     self.hotkey)
+        assert 'taken' in response['key']
+
+
+    @pytest.mark.here
+    def test_hotkey_delete(self):
+        response = req.hotkey_delete(self.core, self.profile, self.book,
+                                     self.hotkey)
+        assert 'not_found' in response['key']
+
+        response = req.hotkey_create(self.core, self.profile, self.book,
+                                     self.hotkey)
+
+        response = req.hotkey_delete(self.core, self.profile, self.book,
+                                     self.hotkey)
+        assert 'deleted' in response['key']
+
+
+    def test_hotkey_updated(self):
+        response = req.hotkey_update(self.core, self.profile, self.book,
+                                     self.hotkey)
+        assert 'not_found' in response['key']
+
+        response = req.hotkey_create(self.core, self.profile, self.book,
+                                     self.hotkey)
+
+        hotkey2 = 'f11'
+        response = req.hotkey_update(self.core, self.profile, self.book,
+                                     hotkey2)
+        assert 'updated' in response['key']
+
+
+
     def test_hotkey_load(self):
         response = req.hotkeys_load(self.core)
-        import pdb;pdb.set_trace()
+        assert not response
             # impor
     # def test_hotkeys_reload(self):
         # import pdb;pdb.set_trace()
