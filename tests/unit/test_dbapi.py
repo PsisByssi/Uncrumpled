@@ -11,6 +11,9 @@ from util import get_all_data
 
 
 class MixIn():
+    profile = 'a profile'
+    book = 'abook'
+    hotkey = ['f5']
     def setup_class(cls):
         cls.tdir = tempfile.mkdtemp()
         cls.db = os.path.join(cls.tdir, 'test.db')
@@ -30,9 +33,6 @@ class MixIn():
 
 
 class TestHotkeys(MixIn):
-    profile = 'a profile'
-    book = 'abook'
-    hotkey = ['f5']
 
     def test_hotkey_create(self):
         rv = dbapi.hotkey_create(self.db, self.profile, self.book, self.hotkey)
@@ -56,3 +56,35 @@ class TestHotkeys(MixIn):
         assert rv
         data = get_all_data(self.db, 'Hotkeys')
         assert not data
+
+
+class TestProfile(MixIn):
+    def test_profile_create(self):
+        rv = dbapi.profile_create(self.db, self.profile)
+        assert rv
+        cond = "where Name == '{}'".format(self.profile)
+        data = halt.load_column(self.db, 'Profiles', ('*',), cond)[0]
+        assert data[0] == self.profile
+        assert data[1] != True # the active column
+
+        rv = dbapi.profile_create(self.db, self.profile)
+        assert not rv
+
+
+    def test_profile_set_active(self):
+        dbapi.profile_create(self.db, self.profile)
+        rv = dbapi.profile_set_active(self.db, self.profile)
+        cond = "where Name == '{}'".format(self.profile)
+        data = halt.load_column(self.db, 'Profiles', ('Active',), cond)[0][0]
+        assert data == True
+        cond = "where Name == '{}'".format('default')
+        data = halt.load_column(self.db, 'Profiles', ('Active',), cond)[0][0]
+        assert data == False
+
+
+    @pytest.mark.h
+    def test_profile_get_active(self):
+        dbapi.profile_create(self.db, self.profile)
+        dbapi.profile_set_active(self.db, self.profile)
+        rv = dbapi.profile_get_active(self.db)
+        assert rv == self.profile
