@@ -4,11 +4,11 @@ from uncrumpled.core import requests as req
 from uncrumpled.core import dbapi
 
 
-def ui_init(core, user_or_token=None, password=None):
+def ui_init(core, first_run, user_or_token=None, password=None):
     '''
     Code for startup
     '''
-    if core.first_run:
+    if first_run:
         yield resp.resp('show_window')
         yield resp.resp('welcome_screen')
     # if data.get('new_user'):

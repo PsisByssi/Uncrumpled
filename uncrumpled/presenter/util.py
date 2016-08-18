@@ -1,3 +1,4 @@
+from types import GeneratorType
 
 system_base = {'binds': {},
               'bind_handlers': [],
@@ -9,9 +10,22 @@ system_base = {'binds': {},
 # PRESENTER_CORE_API = ('bind_add', 'bind_remove')
 
 # Requests the ui can handle # TODO move to the gui
-UI_API = ('status_update', 'bind_remove')
+UI_API = ('status_update',
+          'bind_remove',
+          'show_window',
+          'welcome_screen')
+
 
 def make_class_name(string):
     '''given foo_bar returns FooBar'''
     parts = string.split('_')
     return ''.join(x.capitalize() for x in parts)
+
+
+def traverse(o, tree_types=(list, tuple, GeneratorType)):
+    if isinstance(o, tree_types):
+        for value in o:
+            for subvalue in traverse(value, tree_types):
+                yield subvalue
+    else:
+        yield o

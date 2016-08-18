@@ -5,34 +5,34 @@ from uncrumpled.core import responses as resp
 
 def profile_create(core, profile):
     if dbapi.profile_create(core.db, profile):
-        return resp.status(key='profile_created',
+        yield resp.status(key='profile_created',
                            code=1,
                            template={'profile': profile})
     else:
-        return resp.status(key='profile_taken',
+        yield resp.status(key='profile_taken',
                            code=0,
                            template={'profile': profile})
 
 
 def profile_delete(core, profile):
     if dbapi.profile_delete(core.db, profile):
-        return resp.status(key='profile_deleted',
+        yield resp.status(key='profile_deleted',
                            code=1,
                            template={'profile': profile})
     else:
-        return resp.status(key='profile_not_found',
+        yield resp.status(key='profile_not_found',
                            code=0,
                            template={'profile': profile})
 
 
 def profile_get_active(core):
     dbapi.profile_get_active(core.db)
-    return resp.noop(key='profile_gotten')
+    yield resp.noop(key='profile_gotten')
 
 
 def profile_set_active(core, profile):
     dbapi.profile_set_active(core.db, profile)
-    return resp.status(key='profile_changed',
+    yield resp.status(key='profile_changed',
                        code=1,
                        template={'profile': profile})
 

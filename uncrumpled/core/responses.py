@@ -1,9 +1,4 @@
 
-# this should be in requests
-CORE_API = ('profile_create', 'profile_delete',
-            'profile_set_active', 'profile_get_active',
-            'hotkeys_get_all')
-
 _msg = {'book_taken': 'Book already used for this configuration',
         'book_created': 'Book created: {book}',
         'book_deleted': 'Book deleted: {book}',
@@ -61,5 +56,4 @@ _UI = ('show_window', 'welcome_screen')
 
 def resp(method, **kwargs):
     assert method in _UI, 'Add method to_ui: ' +method
-    # assert method in CORE_API, 'Add method to _ui: ' + method
     return {'output_method': method, 'output_kwargs': kwargs}

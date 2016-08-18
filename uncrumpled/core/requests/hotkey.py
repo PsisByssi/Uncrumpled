@@ -7,23 +7,23 @@ from uncrumpled.core import responses as resp
 
 def hotkey_create(core, profile, book, hotkey):
     if dbapi.hotkey_create(core.db, profile, book, hotkey):
-        return resp.noop(key='hotkey_created')
+        yield resp.noop(key='hotkey_created')
     else:
-        return resp.noop(key='hotkey_taken')
+        yield resp.noop(key='hotkey_taken')
 
 
 def hotkey_delete(core, profile, book, hotkey):
     if dbapi.hotkey_delete(core.db, profile, book, hotkey):
-        return resp.noop(key='hotkey_deleted')
+        yield resp.noop(key='hotkey_deleted')
     else:
-        return resp.noop(key='hotkey_not_found')
+        yield resp.noop(key='hotkey_not_found')
 
 
 def hotkey_update(core, profile, book, hotkey):
     if dbapi.hotkey_update(core.db, profile, book, hotkey):
-        return resp.noop(key='hotkey_updated')
+        yield resp.noop(key='hotkey_updated')
     else:
-        return resp.noop(key='hotkey_not_found')
+        yield resp.noop(key='hotkey_not_found')
 
 
 def hotkeys_load(core, active_profile):

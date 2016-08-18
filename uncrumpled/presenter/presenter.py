@@ -30,35 +30,29 @@ def uncrumpled_request(func):
     all api exposed functions are wrapped here
 
     :return:
-        either a string to be evaled,
-        or a list of strings to be evaled
+        a list of strings to be evaled
     '''
     # @asyncio.coroutine #ASYNC
-    def wrapper(core, *args, **kwargs):
-        # core_response = yield from func(core, *args, **kwargs)# ASYNC
-        core_response = func(core, *args, **kwargs)
-        if isinstance(core_response, (list, tuple, GeneratorType)):
-            result = []
-            for a_resp in core_response:
-                response_handler = update_system(a_resp, SYSTEM)
-                _result = response_handler.partual_ui_update()
-                if _result:
-                    result.append(_res)
-        else:
-            response_handler = update_system(core_response, SYSTEM)
-            result = response_handler.partial_ui_update()
-        if result:
-            return result
+    def wrapper(app, *args, **kwargs):
+        # core_response = yield from func(app.core, *args, **kwargs)# ASYNC
+        core_responses = func(app, *args, **kwargs)
+        resp_handlers = map(update_system, core_responses)
+        result = []
+        for handler in resp_handlers:
+            _res = handler.partial_ui_update()
+            if _res:
+                result.append(_res)
+        return result
     return wrapper
 
 
-def update_system(response, system):
+def update_system(response):
     '''
     takes a update to the system dict from the uncrumpled core
     adds it the the system config in proper format
     '''
     class_name = util.make_class_name(response['input_method'])
-    response_handler = eval('responses.{}(system, response)'.format(class_name))
+    response_handler = eval('responses.{}(SYSTEM, response)'.format(class_name))
     response_handler.add_to_system()
     return response_handler
 

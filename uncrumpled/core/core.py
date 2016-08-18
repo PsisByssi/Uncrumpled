@@ -14,11 +14,16 @@ class Core():
         # self.active_profile = requests.profile_get_active(self)
 
     # @asyncio.coroutine #ASYNC
-    def request(self, data):
+    def request(self, data, *args):
         '''
         call this to send data to the core
+
+        :data: the input request modified to our pleasure
+        :args: provided by the presenter, normally some system state
+
+        :return: [{output1}, {output2}]
         '''
-        return self.handle_request(data) # ASYNC
+        return list(self.handle_request(data, args)) # ASYNC
         # yield from self.messages.put(data)
         # response = yield from self.get_response()
         # return response
@@ -29,11 +34,13 @@ class Core():
         response = self.handle_request(data)
         return response
 
-    def handle_request(self, data):
+    def handle_request(self, data, args):
         method = data['input_method']
         kwargs = data['input_kwargs']
-        if method not in responses.CORE_API:
-            raise Exception('Function not supported by core, add to CORE_API')
+        abc = args
+        if method not in requests.CORE_API:
+            raise Exception('Function not supported by core, add to CORE_API '+ method)
         else:
-            output_response = eval('requests.'+method+'(self, **kwargs)')
-            return dict(output_response, **data) # TODO this should never override
+            output_response = eval('requests.'+method+'(self, *args, **kwargs)')
+            for aresp in output_response:
+                yield dict(aresp, **data) # TODO this should never override

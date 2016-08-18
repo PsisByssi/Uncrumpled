@@ -88,3 +88,8 @@ class ProfileSetActive(ResponseHandler):
 class ProfileGetActive(ResponseHandler):
     def add_to_system(self):
         pass
+
+
+class UiInit(ResponseHandler):
+    def add_to_system(self):
+        pass

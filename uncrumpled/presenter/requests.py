@@ -14,36 +14,36 @@ def jsonify(method, *args, **kwargs):
 
 
 @uncrumpled_request
-def profile_create(core, profile):
+def profile_create(app, profile):
     request = jsonify('profile_create', profile=profile)
-    response = core.request(request)
-    # response = yield from core.request(request) # ASYNC
+    response = app.core.request(request)
+    # response = return from core.request(request) # ASYNC
     return response
 
 
 @uncrumpled_request
-def profile_delete(core, profile):
+def profile_delete(app, profile):
     request = jsonify('profile_delete', profile=profile)
-    response = core.request(request)
+    response = app.core.request(request)
     return response
 
 
 @uncrumpled_request
-def profile_set_active(core, profile):
+def profile_set_active(app, profile):
     request = jsonify('profile_set_active', profile=profile)
-    response = core.request(request)
+    response = app.core.request(request)
     return response
 
 
 @uncrumpled_request
-def profile_get_active(core):
+def profile_get_active(app):
     request = jsonify('profile_get_active')
-    response = core.request(request)
+    response = app.core.request(request)
     return response
 
 
 @uncrumpled_request
-def ui_init(core):
+def ui_init(app):
     request = jsonify('ui_init')
-    response = core.request(request)
+    response = app.core.request(request, app.first_run)
     return response

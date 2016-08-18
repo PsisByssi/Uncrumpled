@@ -31,6 +31,10 @@ class Uncrumpled(MyAppBuilder):
         self.db = os.path.join(self.data_dir, DATABASE_FILE)
         # self.hk =
         # self.tray =
+        # self.hk = system_hotkey.SystemHotkey(consumer=self.hotkey_consumer,
+                                             # check_queue_interval=0.001)
+        self.create_cfg(self.pcfg['config_file'])
+        logging.info('First time run?: ' + str( self.first_run))
 
         if not os.path.isfile(self.db):
             logging.info('A new database is being Created')
@@ -40,9 +44,9 @@ class Uncrumpled(MyAppBuilder):
             logging.info('Database file detected!: %s' % self.db)
 
         os.chdir(os.path.dirname(kivygui.__file__))
-        self.core = core.Core(self.db, main_file=self.main_file)
+        self.core = core.Core(self.db)
         self.gui = kivygui.KivyGui()
-        self.gui.start(self.core)
+        self.gui.start(self)
 
 
 DEVELOPING = True
