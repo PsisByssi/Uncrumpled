@@ -2,6 +2,10 @@
     talks to sql db using halt
 '''
 
+# Note on database Constraining
+
+#A unique constraint is satisfied if and only if no two rows in a table have the same values and have non-null values in the unique columns.
+
 import sqlite3
 from contextlib import suppress
 import json
