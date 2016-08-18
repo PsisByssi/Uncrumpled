@@ -26,20 +26,12 @@ def hotkey_update(core, profile, book, hotkey):
         return resp.noop(key='hotkey_not_found')
 
 
-def hotkeys_load(core):
+def hotkeys_load(core, active_profile):
     '''
     only use this at startup, init system wide hotkeys for the active profile
     '''
-    active_profile = dbapi.profile_get_active(core.db)
-    if not active_profile:
-        raise Exception('Somehow...: No Active Profile Found')
-    rv = []
     for hotkey in dbapi.hotkey_get_all(core.db, active_profile):
-        rv.append(resp.noop(key='hotkey_register', hotkey=hotkey))
-    logging.info('No Hotkeys Detected, no Listening going on')
-    if rv:
-        return rv
-    return False
+        yield resp.noop(key='system_hotkey_register', hotkey=hotkey)
 
 
 def hotkeys_reload(core, old, new):
@@ -50,14 +42,10 @@ def hotkeys_reload(core, old, new):
     :new: new profile
     '''
     if old != new:
-        rv = []
         for hotkey in dbapi.hotkey_get_all(core.db, old):
             logging.info('Unregister ' + str(hotkey))
-            rv.append(resp.noop(key='system_hotkey_unregister', hotkey=hotkey))
+            yield resp.noop(key='system_hotkey_unregister', hotkey=hotkey)
         for hotkey in dbapi.hotkey_get_all(core.db, new):
             logging.info('register' + str(hotkey))
-            rv.append(resp.noop(key='system_hotkey_register', hotkey=hotkey))
-        if rv:
-           return rv
-    return False
+            yield resp.noop(key='system_hotkey_register', hotkey=hotkey)
 

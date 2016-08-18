@@ -3,6 +3,7 @@ import logging
 
 from uncrumpled.core import responses as resp
 from uncrumpled.core import requests as req
+from uncrumpled.core import dbapi
 # from uncrumpled.core.profile import load_hotkeys
 
 
@@ -17,8 +18,8 @@ def ui_init(core, user_or_token=None, password=None):
     # if data.get('new_user'):
         # yield config.new_user(data)
     # yield config.ui_config()
-    profile = req.profile_get_active(core)
-    yield req.profile_set_active(core, profile)
-    yield req.hotkeys_reload(core, profile)
-
-
+    profile = dbapi.profile_get_active(core.db)
+    dbapi.profile_set_active(core.db, profile)
+    yield resp.noop('profile_set_active', profile=profile)
+    for aresp in req.hotkeys_load(core, profile):
+        yield aresp

@@ -37,8 +37,8 @@ def new_db(database):
             "CREATE UNIQUE INDEX hotkey_name ON Hotkeys(Profile, Hotkey)")
 
         cur.execute("""CREATE TABLE Profiles(Name Text UNIUQE,
-                                           Active Integer,
-                                           MashConfig Text)""")
+                                             Active Integer,
+                                             MashConfig Text)""")
 
         cur.execute("""CREATE TABLE Books(Book Text not null,
                                         Profile Text not null,

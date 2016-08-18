@@ -48,6 +48,7 @@ _noop = ('profile_gotten',
          'hotkey_updated',
          'system_hotkey_register',
          'system_hotkey_unregister',
+         'profile_set_active',
         )
 
 # no operation on the ui, system operations are allowed

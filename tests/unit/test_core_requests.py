@@ -19,6 +19,9 @@ from uncrumpled.core import dbapi, Core
 from util import get_all_data
 
 class MixIn():
+    profile = 'test profile'
+    book = 'test book'
+    hotkey = ['f5']
     def setup_class(cls):
         cls.tdir = tempfile.mkdtemp()
         # cls.db = os.path.join(cls.tdir, 'test.db')
@@ -40,12 +43,15 @@ class MixIn():
         dbapi.new_db(self.core.db)
 
 
+@pytest.mark.k
 class TestProfile(MixIn):
     def test_profile_create(self):
+        import pdb;pdb.set_trace()
         response = req.profile_create(self.core, 'new')
         assert 'profile created' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] == 1
 
+        import pdb;pdb.set_trace()
         response = req.profile_create(self.core, 'new')
         assert 'profile already' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
@@ -83,9 +89,6 @@ class TestProfile(MixIn):
 
 class TestBook(MixIn):
     active_profile = 'default'
-    profile = 'test profile'
-    book = 'test book'
-    hotkey = ['f5']
 
     def setup_method(self, func):
         super().setup_method(func)
@@ -138,9 +141,7 @@ class TestBook(MixIn):
 
 class TestPage(MixIn):
     page = 'testpage'
-    profile = 'test profile'
     program = 'testprogram'
-    book = 'Note'
 
     def test_page_create(self):
         specific = None;
@@ -202,9 +203,6 @@ class TestPage(MixIn):
 
 
 class TestHotkeys(MixIn):
-    profile = 'a profile'
-    book = 'abook'
-    hotkey = ['f5']
 
     def test_hotkey_create(self):
         response = req.hotkey_create(self.core, self.profile, self.book,
@@ -247,53 +245,62 @@ class TestHotkeys(MixIn):
 
 
     def test_hotkey_load(self):
-        response = req.hotkeys_load(self.core)
+        response = list(req.hotkeys_load(self.core, self.profile))
         assert not response
         dbapi.profile_create(self.core.db, self.profile)
-        dbapi.profile_set_active(self.core.db, self.profile)
-        response = req.hotkeys_load(self.core)
+        response = list(req.hotkeys_load(self.core, self.profile))
         assert not response
 
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
         hotkey2 = ['f11']
         dbapi.hotkey_create(self.core.db, self.profile, self.book, hotkey2)
-        response = req.hotkeys_load(self.core)
+        response = list(req.hotkeys_load(self.core, self.profile))
 
-        for aresp in response[:1]:
-            assert aresp['key'] == 'system_hotkey_register'
-            assert aresp['hotkey'] in (self.hotkey, hotkey2)
-
-        for aresp in response[2:]:
-            assert aresp['key'] == 'system_hotkey_unregister'
-            assert aresp['hotkey'] in (self.hotkey, hotkey2)
+        assert response[0]['key'] == 'system_hotkey_register'
+        assert response[0]['hotkey'] in (self.hotkey, hotkey2)
+        assert response[1]['key'] == 'system_hotkey_register'
+        assert response[1]['hotkey'] in (self.hotkey, hotkey2)
 
 
-    @pytest.mark.here
     def test_hotkeys_reload(self):
-        response = req.hotkeys_reload(self.core, 'default', self.profile)
+        response = list(req.hotkeys_reload(self.core, 'default', self.profile))
         assert not response
 
         dbapi.profile_create(self.core.db, self.profile)
         dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
-        response = req.hotkeys_reload(self.core, 'default', self.profile)
+        response = list(req.hotkeys_reload(self.core, 'default', self.profile))
         assert response[0]['key'] == 'system_hotkey_unregister'
         assert response[1]['key'] == 'system_hotkey_register'
 
 
 class TestUiInit(MixIn):
-    def test_functions_returned(self):
+    def test_first_run(self):
         self.core.first_run = True
         responses = list(req.ui_init(self.core))
         assert 'show_window' == responses[0]['output_method']
         assert 'welcome_screen' == responses[1]['output_method']
-        import pdb;pdb.set_trace()
-        assert 'profile_gotten' == responses[2]['key']
-        assert 'hotkeys_reloaded' == responses[3]['key']
+        assert 'profile_set_active' == responses[2]['key']
+        assert len(responses) == 3
 
+        dbapi.profile_create(self.core.db, self.profile)
+        dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
+        dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
+        responses = list(req.ui_init(self.core))
+        assert responses[3]['key'] == 'system_hotkey_register'
+        assert len(responses) == 4
+
+    def test_all_other_runs(self):
         self.core.first_run = False
         responses = list(req.ui_init(self.core))
-        assert 'profile_gotten' == responses[2]['key']
-        assert 'hotkeys_reloaded' == responses[3]['key']
+        assert 'profile_set_active' == responses[0]['key']
+        assert len(responses) == 1
+
+        dbapi.profile_create(self.core.db, self.profile)
+        dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
+        dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
+        responses = list(req.ui_init(self.core))
+        assert responses[1]['key'] == 'system_hotkey_register'
+        assert len(responses) == 2
 
 
