@@ -18,7 +18,6 @@ from uncrumpled.core import requests as req
 from uncrumpled.core import dbapi, Core
 from util import get_all_data
 
-# from uncrumpled.main import MyAppBuilder
 class MixIn():
     def setup_class(cls):
         cls.tdir = tempfile.mkdtemp()
@@ -217,7 +216,6 @@ class TestHotkeys(MixIn):
         assert 'taken' in response['key']
 
 
-    @pytest.mark.here
     def test_hotkey_delete(self):
         response = req.hotkey_delete(self.core, self.profile, self.book,
                                      self.hotkey)
@@ -239,21 +237,48 @@ class TestHotkeys(MixIn):
         response = req.hotkey_create(self.core, self.profile, self.book,
                                      self.hotkey)
 
-        hotkey2 = 'f11'
+        response = req.hotkey_update(self.core, self.profile, self.book,
+                                     self.hotkey)
+        assert 'updated' in response['key']
+        hotkey2 = ['f11']
         response = req.hotkey_update(self.core, self.profile, self.book,
                                      hotkey2)
-        assert 'updated' in response['key']
-
+        assert 'not_found' in response['key']
 
 
     def test_hotkey_load(self):
         response = req.hotkeys_load(self.core)
         assert not response
-            # impor
-    # def test_hotkeys_reload(self):
-        # import pdb;pdb.set_trace()
-        # response = req.hotkeys_reload(self.core, 'default', 'someother')
+        dbapi.profile_create(self.core.db, self.profile)
+        dbapi.profile_set_active(self.core.db, self.profile)
+        response = req.hotkeys_load(self.core)
+        assert not response
 
+        dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
+        hotkey2 = ['f11']
+        dbapi.hotkey_create(self.core.db, self.profile, self.book, hotkey2)
+        response = req.hotkeys_load(self.core)
+
+        for aresp in response[:1]:
+            assert aresp['key'] == 'system_hotkey_register'
+            assert aresp['hotkey'] in (self.hotkey, hotkey2)
+
+        for aresp in response[2:]:
+            assert aresp['key'] == 'system_hotkey_unregister'
+            assert aresp['hotkey'] in (self.hotkey, hotkey2)
+
+
+    @pytest.mark.here
+    def test_hotkeys_reload(self):
+        response = req.hotkeys_reload(self.core, 'default', self.profile)
+        assert not response
+
+        dbapi.profile_create(self.core.db, self.profile)
+        dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
+        dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
+        response = req.hotkeys_reload(self.core, 'default', self.profile)
+        assert response[0]['key'] == 'system_hotkey_unregister'
+        assert response[1]['key'] == 'system_hotkey_register'
 
 
 class TestUiInit(MixIn):

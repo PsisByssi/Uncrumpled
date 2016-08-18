@@ -66,7 +66,6 @@ def _add_hotkey(db, hotkey, profile, book, con=None):
     options = {'Hotkey': hotkey, 'Profile': profile, 'Book': book}
     try:
         halt.insert(db, 'Hotkeys', options, con=con)
-        import pdb;pdb.set_trace()
     except halt.HaltException as err:
         raise UniqueHotkeyError(str(err))
 
@@ -103,6 +102,7 @@ def hotkey_create(db, profile, book, hotkey):
 
 
 def hotkey_delete(db, profile, book, hotkey):
+    assert type(hotkey) == list
     if hotkey in hotkey_get_all(db, profile):
         cond = "WHERE Profile=='{}' AND Book=='{}'".format(profile, book)
         halt.delete(db, 'Hotkeys', cond)
@@ -111,10 +111,11 @@ def hotkey_delete(db, profile, book, hotkey):
 
 
 def hotkey_update(db, profile, book, hotkey):
+    assert type(hotkey) == list
     if hotkey in hotkey_get_all(db, profile):
         to_update={'Profile': profile, 'Book': book, 'Hotkey': hotkey}
         cond = "WHERE Profile=='{}' AND Book=='{}'".format(profile, book)
-        halt.update(db, 'Hotkeys', to_save, cond=cond)
+        halt.update(db, 'Hotkeys', to_update, cond=cond)
         return True
     return False
 
@@ -124,7 +125,7 @@ def hotkey_get_all(db, profile):
     hotkeys = []
     cond = "where Profile == '" + profile + "'"
     for hk in  halt.load_column(db, 'Hotkeys', ('Hotkey',), cond):
-        hotkeys.append(halt.objectify(hk))
+        hotkeys.append(halt.objectify(hk[0]))
     return hotkeys
 
 

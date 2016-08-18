@@ -38,23 +38,26 @@ def hotkeys_load(core):
         rv.append(resp.noop(key='hotkey_register', hotkey=hotkey))
     logging.info('No Hotkeys Detected, no Listening going on')
     if rv:
-        return True
+        return rv
+    return False
 
 
 def hotkeys_reload(core, old, new):
     '''
-    :old: old profile, must have already been activated
-    :new: new profile
     changes the active system hotkeys based on the profiles
+
+    :old: old profile that has had it's hotkeys currently loaded
+    :new: new profile
     '''
     if old != new:
         rv = []
         for hotkey in dbapi.hotkey_get_all(core.db, old):
             logging.info('Unregister ' + str(hotkey))
             rv.append(resp.noop(key='system_hotkey_unregister', hotkey=hotkey))
-        for hotkey in dbapi.hotkeys_get_all(core.db, new):
+        for hotkey in dbapi.hotkey_get_all(core.db, new):
             logging.info('register' + str(hotkey))
             rv.append(resp.noop(key='system_hotkey_register', hotkey=hotkey))
         if rv:
-            return True
+           return rv
+    return False
 

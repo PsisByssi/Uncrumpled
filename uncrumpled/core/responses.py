@@ -41,13 +41,13 @@ def status(key, code, template=None):
 
 
 _noop = ('profile_gotten',
-         'system_hotkey_register',
-         'system_hotkey_unregister',
          'hotkey_created',
          'hotkey_taken',
          'hotkey_deleted',
          'hotkey_not_found',
          'hotkey_updated',
+         'system_hotkey_register',
+         'system_hotkey_unregister',
         )
 
 # no operation on the ui, system operations are allowed
