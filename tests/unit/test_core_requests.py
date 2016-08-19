@@ -283,8 +283,8 @@ class TestHotkeys(MixIn):
 
 class TestUiInit(MixIn):
     def test_first_run(self):
-        self.core.first_run = True
-        responses = self.run(req.ui_init, self.core)
+        self.first_run = True
+        responses = self.run(req.ui_init, self.core, self.first_run)
         assert 'show_window' == responses[0]['output_method']
         assert 'welcome_screen' == responses[1]['output_method']
         assert 'profile_set_active' == responses[2]['key']
@@ -293,20 +293,19 @@ class TestUiInit(MixIn):
         dbapi.profile_create(self.core.db, self.profile)
         dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
-        responses = self.run(req.ui_init, self.core)
+        responses = self.run(req.ui_init, self.core, self.first_run)
         assert responses[3]['key'] == 'system_hotkey_register'
         assert len(responses) == 4
 
     def test_all_other_runs(self):
-        self.core.first_run = False
-        responses = self.run(req.ui_init, self.core)
-        assert 'profile_set_active' == responses[0]['key']
-        assert len(responses) == 1
+        self.first_run = False
+        responses = self.run(req.ui_init, self.core, self.first_run)
+        assert 'profile_set_active' == responses['key']
 
         dbapi.profile_create(self.core.db, self.profile)
         dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
-        responses = self.run(req.ui_init, self.core)
+        responses = self.run(req.ui_init, self.core, self.first_run)
         assert responses[1]['key'] == 'system_hotkey_register'
         assert len(responses) == 2
 

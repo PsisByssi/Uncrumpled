@@ -48,16 +48,16 @@ class TestPresenter(Mixin):
     def test_profile(self):
         profile = 'some test profile'
         response = self.run(req.profile_create, self.app, profile=profile)
-        assert 'profile created' in response[0].lower()
+        assert 'profile created' in response.lower()
 
         response = self.run(req.profile_create, self.app, profile)
-        assert 'profile already in use' in response[0].lower()
+        assert 'profile already in use' in response.lower()
 
         response = self.run(req.profile_delete, self.app, profile)
-        assert 'profile deleted' in response[0].lower()
+        assert 'profile deleted' in response.lower()
 
         response = self.run(req.profile_delete, self.app, profile)
-        assert 'profile does not exist' in response[0].lower()
+        assert 'profile does not exist' in response.lower()
 
 
 class TestUiInit(Mixin):
