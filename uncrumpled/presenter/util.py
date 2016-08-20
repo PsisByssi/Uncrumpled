@@ -4,6 +4,7 @@ system_base = {'binds': {},
               'bind_handlers': [],
               'functions': {},
               'ui_event_types': [],
+              'pages': {},
               'profiles': []}
 
 # The Responses we can handle from the core

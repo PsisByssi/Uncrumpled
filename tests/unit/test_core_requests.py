@@ -10,9 +10,11 @@ import asyncio
 import tempfile
 import os
 import shutil
+from types import GeneratorType
 
 import pytest
 import halt
+import peasoup
 
 from uncrumpled.core import requests as req
 from uncrumpled.core import dbapi, Core
@@ -21,7 +23,10 @@ from util import get_all_data
 class MixIn():
     profile = 'test profile'
     book = 'test book'
+    program = 'testprogram'
     hotkey = ['f5']
+    specific = None
+    loose = None
     def setup_class(cls):
         cls.tdir = tempfile.mkdtemp()
         # cls.db = os.path.join(cls.tdir, 'test.db')
@@ -46,10 +51,14 @@ class MixIn():
         '''
         some isolation if we change from generaotrs
         '''
-        res = list(func(*args, **kwargs))
-        if len(res) == 1:
-            return res[0]
-        return res
+        res = func(*args, **kwargs)
+        if type(res) != GeneratorType:
+            return res
+        else:
+            res = list(res)
+            if len(res) == 1:
+                return res[0]
+            return res
 
 
 class TestProfile(MixIn):
@@ -148,12 +157,10 @@ class TestBook(MixIn):
 
 class TestPage(MixIn):
     page = 'testpage'
-    program = 'testprogram'
 
     def test_page_create(self):
-        specific = None;
         response = self.run(req.page_create, self.core, self.profile, self.book,
-                                   self.program, specific)
+                                   self.program, self.specific)
         assert 'page created' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] == 1
         data = get_all_data(self.core.db, 'Pages')[0]
@@ -162,45 +169,46 @@ class TestPage(MixIn):
         assert data[3] == self.program
 
         response = self.run(req.page_create, self.core, self.profile, self.book,
-                                   self.program, specific)
+                                   self.program, self.specific)
         assert 'page already' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
 
+
     def test_page_delete(self):
-        specific = None; loose = None
         response = self.run(req.page_delete, self.core, self.profile, self.book,
-                                    'bad_page', specific, loose)
+                                    'bad_page', self.specific, self.loose)
         assert 'does not exist' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
 
         response = self.run(req.page_create, self.core, self.profile, self.book,
-                                   self.program, specific)
+                                   self.program, self.specific)
 
 
+        data = get_all_data(self.core.db, 'Pages')
         response = self.run(req.page_delete, self.core, self.profile, self.book,
-                                    self.program, specific, loose)
+                                    self.program, self.specific, self.loose)
         assert 'page deleted' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] == 1
         data = get_all_data(self.core.db, 'Pages')
         assert not data
 
         response = self.run(req.page_delete, self.core, self.profile, self.book,
-                                    self.program, specific, loose)
+                                    self.program, self.specific, self.loose)
         assert 'does not exist' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
 
     def test_page_update(self):
-        specific = None; loose = None
         response = self.run(req.page_update, self.core, self.profile, self.book,
-                                    'bad_page', specific, loose)
+                                    'bad_page', self.specific, self.loose)
         assert 'does not exist' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
 
         response = self.run(req.page_create, self.core, self.profile, self.book,
-                                   self.program, specific)
+                                   self.program, self.specific)
+        data = get_all_data(self.core.db, 'Pages')
 
         response = self.run(req.page_update, self.core, self.profile, self.book,
-                                   self.program, specific)
+                                   self.program, self.specific)
         assert 'page saved' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] == 1
         data = get_all_data(self.core.db, 'Pages')[0]
@@ -264,9 +272,9 @@ class TestHotkeys(MixIn):
         response = self.run(req.hotkeys_load, self.core, self.profile)
 
         assert response[0]['key'] == 'system_hotkey_register'
-        assert response[0]['hotkey'] in (self.hotkey, hotkey2)
+        assert response[0]['kwargs']['hotkey'] in (self.hotkey, hotkey2)
         assert response[1]['key'] == 'system_hotkey_register'
-        assert response[1]['hotkey'] in (self.hotkey, hotkey2)
+        assert response[1]['kwargs']['hotkey'] in (self.hotkey, hotkey2)
 
 
     def test_hotkeys_reload(self):
@@ -310,3 +318,74 @@ class TestUiInit(MixIn):
         assert len(responses) == 2
 
 
+#TODO move to own file
+class TestPageFind(MixIn):
+    specific = 'banking.com/page'
+    program = 'testprogram'
+    '''
+    def test_can_find_a_specific_page(self):
+        dbapi.profile_create(self.core.db, self.profile)
+        dbapi.page_create(self.core.db, self.profile, self.book, self.program, None, None)
+        dbapi.page_create(self.core.db, self.profile, self.book, self.program, self.specific, None)
+        # resp = self.run(req.page_find, self.core.db, self.profile, self.book, self.program)
+        data = get_all_data(self.core.db, 'Pages')[0]
+        assert resp[4] == self.specific
+
+    '''
+    def test_page_find_general(self):
+        dbapi.profile_create(self.core.db, self.profile)
+        assert dbapi.page_create(self.core.db, self.profile, self.book, self.program, None, None)
+        assert dbapi.page_create(self.core.db, self.profile, self.profile, self.program, 'some specifc', None)
+        resp = self.run(req.page_find, self.core.db, self.profile, self.book, self.program)
+        assert resp
+        rowid = resp
+        data = get_all_data(self.core.db, 'Pages')[0]
+        assert data[1] == self.profile
+        assert data[2] == self.book
+        assert data[3] == self.program
+        assert data[4] == dbapi.UNIQUE_NULL
+
+
+class TestPageWhatDo(MixIn):
+    def test_basic(s):
+        kwargs = {'no_process': 'shelve'}
+        dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
+        resp = s.run(req.page_what_do, s.core.db, s.profile, s.book, s.program, s.hotkey)
+        assert resp is False
+
+    def test_general(s):
+        kwargs = {'no_process': 'write'}
+        dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
+        resp = s.run(req.page_what_do, s.core.db, s.profile, s.book, s.program, s.hotkey)
+        assert resp
+
+        # kwargs = {'no_process': 'loose'}
+        # dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
+        # resp = s.run(req.page_what_do, s.core.db, s.profile, s.book, s.program, s.hotkey)
+
+
+    # Not sure how/what i want to do, also what about a settings file???? argh
+    def test_settings_inheritance(self):
+        pass
+    def test_settings_inheritance(composiiton):
+        pass
+
+
+@pytest.mark.h
+class TestHotkeyPressed(MixIn):
+    def test_general_page(s):
+        # Test a note gets created if need be
+        dbapi.profile_create(s.core.db, s.profile)
+        kwargs = {'no_process': 'write'}
+        dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
+        program, pid, = peasoup.process_exists()
+        page = (s.profile, s.book, program, None, None)
+
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey)
+        resp['output_method'] == 'load_page'
+        assert resp['output_kwargs']['page'] == 1
+
+        # Now test we can load it on the next key press
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey)
+        resp['output_method'] == 'load_page'
+        assert resp['output_kwargs']['page'] == 1

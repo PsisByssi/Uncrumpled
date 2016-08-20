@@ -10,11 +10,14 @@ import logging
 
 import esky
 import peasoup
+import system_hotkey
 
 import kivygui
 from uncrumpled import core
 from uncrumpled.core.dbapi import create
+from uncrumpled.core.requests import hotkey_pressed
 from uncrumpled import presenter
+from uncrumpled.sideeffects import SideEffects
 
 LOG_FILE = 'log.log'
 DATABASE_FILE = 'unc.db'
@@ -23,18 +26,26 @@ DEVELOPING = True
 class MyAppBuilder(peasoup.AppBuilder):
     pass
 
-class Uncrumpled(MyAppBuilder):
+class Uncrumpled(MyAppBuilder, SideEffects):
 
     def __init__(self, *args, **kwargs):
         MyAppBuilder.__init__(self, *args, **kwargs)
+
+    def hotkey_consumer(self, ev, hotkey, args):
+        program, pid, = peasoup.process_exists()
+        profile = self.active_profile
+        resp = uncrumpled_request(hotkey_pressed(hotkey, program, hotkey))
+        self.gui.main_window.unc_load_file(resp)
+
 
     def start(self):
         self.data_dir = self.setup_data_dir()
         self.db = os.path.join(self.data_dir, DATABASE_FILE)
         # self.hk =
         # self.tray =
-        # self.hk = system_hotkey.SystemHotkey(consumer=self.hotkey_consumer,
-                                             # check_queue_interval=0.001)
+        self.hk = system_hotkey.SystemHotkey(consumer=self.hotkey_consumer,
+                                             check_queue_interval=0.001)
+        self.hk.register(['f5'])
         self.setup_config(self.data_dir)
 
         if not os.path.isfile(self.db):

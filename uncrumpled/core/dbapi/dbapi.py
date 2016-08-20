@@ -2,10 +2,6 @@
     talks to sql db using halt
 '''
 
-# Note on database Constraining
-
-#A unique constraint is satisfied if and only if no two rows in a table have the same values and have non-null values in the unique columns.
-
 import sqlite3
 from contextlib import suppress
 import json
@@ -134,6 +130,10 @@ def hotkey_get_all(db, profile):
 
 
 def _page_save(profile, book, program, specific, loose):
+    if not program: program = util.UNIQUE_NULL
+    if not specific: specific = util.UNIQUE_NULL
+    if not loose: loose = util.UNIQUE_NULL
+
     to_save = {
         'Profile': profile,
         'Book': book,
@@ -142,16 +142,6 @@ def _page_save(profile, book, program, specific, loose):
         'Specific': specific,
         'Loose': loose,
     }
-
-    if specific is None:
-        specific = ''
-    if program is None:
-        program = ''
-    if loose is None:
-        loose = ''
-
-    name = book + program + profile + specific + loose
-    to_save['Name'] = name
     return to_save
 
 
@@ -165,19 +155,20 @@ def page_create(db, profile, book, program, specific, loose):
 
 
 def page_update(db, profile, book, program, specific, loose):
-    page = (profile, book, program, specific, loose)
-    to_save = _page_save(profile, book, program, specific, loose)
-    if page in page_get_all(db):
-        cond = util.page_select(*page)
-        halt.update(db, 'Pages', to_save, cond=cond, mash=False)
+    rowid = util.page_rowid_get(db, profile, book, program, specific, loose)
+    if rowid:
+        to_update = _page_save(profile, book, program, specific, loose)
+    # if page in page_get_all(db):
+        cond = "WHERE Id == {}".format(rowid)
+        halt.update(db, 'Pages', to_update, cond=cond, mash=False)
         return True
     return False
 
 
 def page_delete(db, profile, book, program, specific, loose):
-    page = (profile, book, program, specific, loose)
-    if page in page_get_all(db):
-        cond = util.page_select(*page)
+    rowid = util.page_rowid_get(db, profile, book, program, specific, loose)
+    if rowid:
+        cond = "WHERE Id == {}".format(rowid)
         halt.delete(db, 'Pages', cond)
         return True
     return False

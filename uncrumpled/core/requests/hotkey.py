@@ -43,9 +43,6 @@ def hotkeys_reload(core, old, new):
     '''
     if old != new:
         for hotkey in dbapi.hotkey_get_all(core.db, old):
-            logging.info('Unregister ' + str(hotkey))
             yield resp.noop(key='system_hotkey_unregister', hotkey=hotkey)
         for hotkey in dbapi.hotkey_get_all(core.db, new):
-            logging.info('register' + str(hotkey))
             yield resp.noop(key='system_hotkey_register', hotkey=hotkey)
-

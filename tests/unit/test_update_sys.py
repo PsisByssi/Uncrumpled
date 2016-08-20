@@ -66,3 +66,17 @@ class TestProfile():
         assert profile.partial_ui_update()
 
 
+class TestLoadPage():
+    def test_system_hotkey_register():
+        self.resposne['sys_method'] = 'system_hotkey_register'
+        self.resposne['output_method'] = 'system_hotkey_register'
+        shk = resp.SystemHotkeyRegister(self.system, self.response)
+        shk.add_to_system()
+        assert self.response
+
+
+class TestLoadPage(MixIn):
+    def test_load_page(self):
+        pass
+        # We get a row id, we need to turn that into a symlink..
+        # we also ahve to do a whole bunch of stuff see old _load_page

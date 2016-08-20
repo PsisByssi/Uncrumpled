@@ -38,7 +38,7 @@ def uncrumpled_request(func):
         core_responses = func(app, *args, **kwargs)
         result = []
         for resp in core_responses:
-            resp_handler = update_system(resp)
+            resp_handler = update_system(app, resp)
             _res =resp_handler.partial_ui_update()
             if _res:
                 result.append(_res)
@@ -46,7 +46,7 @@ def uncrumpled_request(func):
     return wrapper
 
 
-def update_system(response):
+def update_system(app, response):
     '''
     takes a update to the system dict from the uncrumpled core
     adds it the the system config in proper format
@@ -54,4 +54,10 @@ def update_system(response):
     class_name = util.make_class_name(response['input_method'])
     response_handler = eval('responses.{}(SYSTEM, response)'.format(class_name))
     response_handler.add_to_system()
+    # Do side effects if required i.e system hotkeys etc
+    if response['output_method'] == 'noop':
+        try:
+            eval('app.{}(**kwargs)'.format(response['key'], response['kwargs']))
+        except Exception as err:
+            pass
     return response_handler

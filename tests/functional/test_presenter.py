@@ -43,7 +43,7 @@ class Mixin():
         # return self.event_loop.run_until_complete(func())
 
 
-class TestPresenter(Mixin):
+class TestProfile(Mixin):
     # @asyncio.coroutine #ASYNC hmm, do not think this is needed
     def test_profile(self):
         profile = 'some test profile'
@@ -71,4 +71,3 @@ class TestUiInit(Mixin):
         self.app.first_run = False
         response = self.run(req.ui_init, self.app)
         assert not response
-

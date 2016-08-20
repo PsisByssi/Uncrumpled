@@ -49,10 +49,13 @@ _noop = ('profile_gotten',
 # no operation on the ui, system operations are allowed
 def noop(key, **data):
     assert key in _noop, 'Add the key to noop ' + key
-    return dict(data, **{'output_method': 'noop', 'key': key})
+    return dict({'output_method': 'noop', 'key': key, 'kwargs': data})
 
 
-_UI = ('show_window', 'welcome_screen')
+_UI = ('show_window',
+       'welcome_screen',
+       'page_load'
+        )
 
 def resp(method, **kwargs):
     assert method in _UI, 'Add method to_ui: ' +method

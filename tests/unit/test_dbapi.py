@@ -14,6 +14,9 @@ class MixIn():
     profile = 'a profile'
     book = 'abook'
     hotkey = ['f5']
+    program = 'firefox'
+    specific = None
+    loose = None
     def setup_class(cls):
         cls.tdir = tempfile.mkdtemp()
         cls.db = os.path.join(cls.tdir, 'test.db')
@@ -82,9 +85,17 @@ class TestProfile(MixIn):
         assert data == False
 
 
-    @pytest.mark.h
     def test_profile_get_active(self):
         dbapi.profile_create(self.db, self.profile)
         dbapi.profile_set_active(self.db, self.profile)
         rv = dbapi.profile_get_active(self.db)
         assert rv == self.profile
+
+
+class TestPage(MixIn):
+    def test_page_create_specific(self):
+        self.specific = 'something specific'
+        response = dbapi.page_create(self.db, self.profile, self.book,
+                                   self.program, self.specific, self.loose)
+        data = get_all_data(self.db, 'Pages')[0]
+        assert data[4] == self.specific

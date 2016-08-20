@@ -6,11 +6,6 @@ from collections import defaultdict
 
 from uncrumpled.presenter.util import UI_API
 
-# binds = {event_type: {hk [cb1, cb2]}]
-
-# input format
-# {'add_bind': {'hotkey': '', 'event_type': '', 'command'}}
-# {'add_bind'}
 
 class ResponseHandler():
     def __init__(self, system, response):
@@ -37,6 +32,9 @@ class ResponseHandler():
 
 class BindAdd(ResponseHandler):
     def add_to_system(self):
+        # input format
+        # {'add_bind': {'hotkey': '', 'event_type': '', 'command'}}
+        # after: sys = {binds: {event_type: {hk [cb1, cb2]}]}
         event_type = self.response['event_type']
         hk = self.response['hotkey']
         command = self.response['command']
@@ -93,3 +91,26 @@ class ProfileGetActive(ResponseHandler):
 class UiInit(ResponseHandler):
     def add_to_system(self):
         pass
+
+
+class PageLoad(ResponseHandler):
+    # input format: {rowid: #, }
+    # after: sys = {pages: {id: {is_open: bool, file: ""}}}
+    def add_to_system(self):
+        page_id = self.response['page_id']
+        existing = self.system['pages'][page_id].get(page_id)
+        if not existing:
+            file = core.page_path_get(page_id)
+            self.system['pages'][page_id] = {'is_open': True, 'file': file}
+        # if existing:
+            # if existing['is_open']:
+                # raise Exception('Something went wrong')
+                # TODO, how will the core know if it is open or closed..
+                # Make the core store some state about pages.. just what
+                # is necessary. up here should be less logic
+                # i.e open and closing gets decided down there
+
+class PageClose(ResponseHandler):
+    def add_to_system(self):
+        page_id = self.response['page_id']
+        self.system['pages'][page_id]['is_open'] = False

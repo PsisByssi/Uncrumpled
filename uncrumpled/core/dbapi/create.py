@@ -22,40 +22,40 @@ def new_db(database):
         cur = con.cursor()
         cur.execute('pragma foreign_keys = off')
 
-        cur.execute("""CREATE TABLE UserInfo(Name Text,
-                                           Password Text)""")
+        cur.execute("""CREATE TABLE UserInfo(Name TEXT,
+                                           Password TEXT)""")
 
-        cur.execute("""CREATE TABLE DefaultOptions(Name Text,
-                                                 MashConfig Text)
+        cur.execute("""CREATE TABLE DefaultOptions(Name TEXT,
+                                                 MashConfig TEXT)
                                                  """)
 
-        cur.execute("""CREATE TABLE Hotkeys(Profile Text,
-                                          Book Text not null,
-                                          Hotkey Text not null,
-                                          MashConfig Text)""")
+        cur.execute("""CREATE TABLE Hotkeys(Profile TEXT,
+                                          Book TEXT NOT NULL,
+                                          Hotkey TEXT NOT NULL,
+                                          MashConfig TEXT)""")
         cur.execute(
             "CREATE UNIQUE INDEX hotkey_name ON Hotkeys(Profile, Hotkey)")
 
-        cur.execute("""CREATE TABLE Profiles(Name Text PRIMARY KEY,
-                                             Active Integer,
-                                             MashConfig Text)""")
+        cur.execute("""CREATE TABLE Profiles(Name TEXT PRIMARY KEY,
+                                             Active INTEGER,
+                                             MashConfig TEXT)""")
 
-        cur.execute("""CREATE TABLE Books(Book Text not null,
-                                        Profile Text not null,
+        cur.execute("""CREATE TABLE Books(Book TEXT NOT NULL,
+                                        Profile TEXT NOT NULL,
                                         MashConfig Text)""")
         cur.execute(
             "CREATE UNIQUE INDEX book_name ON Books(Profile, Book)")
 
-        cur.execute("""CREATE TABLE Pages(Name Text UNIQUE not null,
-                                          Profile Text not null,
-                                          Book Text not null,
-                                          Program Text,
-                                          Specific Text,
-                                          Loose Text,
-                                          Symlink Text,
-                                          MashConfig Text)""")
+        cur.execute("""CREATE TABLE Pages(Id INTEGER PRIMARY KEY,
+                                          Profile TEXT NOT NULL,
+                                          Book TEXT NOT NULl,
+                                          Program TEXT NOT NULL,
+                                          Specific TEXT NOT NULL,
+                                          Loose TEXT NOT NULL,
+                                          Symlink TEXT,
+                                          MashConfig TEXT)""")
         cur.execute(
-            "CREATE UNIQUE INDEX page_name ON Pages(Profile, Book, Program)")
+            "CREATE UNIQUE INDEX page_name ON Pages(Profile, Book, Program, Specific, Loose)")
 
         cur.execute("INSERT INTO Profiles ('Name') VALUES ('default')")
         cur.execute("INSERT INTO DefaultOptions ('Name') VALUES ('user')")
