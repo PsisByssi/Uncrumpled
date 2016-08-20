@@ -36,10 +36,10 @@ def uncrumpled_request(func):
     def wrapper(app, *args, **kwargs):
         # core_response = yield from func(app.core, *args, **kwargs)# ASYNC
         core_responses = func(app, *args, **kwargs)
-        resp_handlers = map(update_system, core_responses)
         result = []
-        for handler in resp_handlers:
-            _res = handler.partial_ui_update()
+        for resp in core_responses:
+            resp_handler = update_system(resp)
+            _res =resp_handler.partial_ui_update()
             if _res:
                 result.append(_res)
         return result
@@ -55,4 +55,3 @@ def update_system(response):
     response_handler = eval('responses.{}(SYSTEM, response)'.format(class_name))
     response_handler.add_to_system()
     return response_handler
-
