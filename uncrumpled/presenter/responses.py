@@ -6,14 +6,17 @@ from collections import defaultdict
 
 from uncrumpled.presenter.util import UI_API
 
+from uncrumpled import core
+
 
 class ResponseHandler():
-    def __init__(self, system, response):
+    def __init__(self, system, response, app=None):
         '''
         A response recieved from the uncrumpled core
         '''
         self.system = system
         self.response = response
+        self.app = app
 
     def partial_ui_update(self):
         '''
@@ -68,6 +71,19 @@ class BindRemove(ResponseHandler):
                 break
 
 
+class BookCreate(ResponseHandler):
+    def add_to_system(self):
+        pass
+
+
+class PageCreate(ResponseHandler):
+    def add_to_system(self):
+        page_id = self.response['page_id']
+        init_text = self.response.get('init_text')
+        file = core.util.ufile_create(self.app, page_id, init_text)
+        self.system['pages'][page_id] = {'is_open': False, 'file': file}
+
+
 class ProfileCreate(ResponseHandler):
     def add_to_system(self):
         self.system['profiles'].append(self.response['input_kwargs']['profile'])
@@ -93,24 +109,30 @@ class UiInit(ResponseHandler):
         pass
 
 
-class PageLoad(ResponseHandler):
+class HotkeyPressed(ResponseHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.response['output_method'] == 'page_load':
+            self.add_to_system = self._page_load
+        else:
+            self.add_to_system = self._page_close
+
     # input format: {rowid: #, }
     # after: sys = {pages: {id: {is_open: bool, file: ""}}}
-    def add_to_system(self):
-        page_id = self.response['page_id']
-        existing = self.system['pages'][page_id].get(page_id)
+    def _page_load(self):
+        page_id = self.response['output_kwargs']['page_id']
+        existing = self.system['pages'].get(page_id)
         if not existing:
-            file = core.page_path_get(page_id)
+            file = core.util.ufile_get(self.app.db, page_id)
             self.system['pages'][page_id] = {'is_open': True, 'file': file}
-        # if existing:
-            # if existing['is_open']:
-                # raise Exception('Something went wrong')
-                # TODO, how will the core know if it is open or closed..
-                # Make the core store some state about pages.. just what
-                # is necessary. up here should be less logic
-                # i.e open and closing gets decided down there
+        else:
+            self.system['pages'][page_id]['is_open'] = True
 
-class PageClose(ResponseHandler):
-    def add_to_system(self):
-        page_id = self.response['page_id']
+    def _page_close(self):
+        page_id = self.response['output_kwargs']['page_id']
         self.system['pages'][page_id]['is_open'] = False
+
+
+class HotkeysLoad(ResponseHandler):
+    def add_to_system(self):
+        pass

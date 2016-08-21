@@ -6,7 +6,7 @@ I have split the logic as much as possible.
 
 Maybe in the future the core could be in a different language communicating over rpc.
 Because we are not using rpc, the gui has a reference to the app
-the app also has a reference to the gui, so we have bidirectional calling.
+the app COULD also have a reference to the gui for bidirectional calling.
 
 # The Core
 
@@ -117,6 +117,12 @@ books act then as a vim instance.
 
 
 ## New Language:
+
+# Other options before switching lang
+* cython (compile to c)
+* nuitka (compile to c++)
+* mypy (static type checking)
+* pypy (doesn't work with pygame i.e kivy..)
 
 Requriments for libraries include
 * Automatic updating. (although since we package python we could have a start script and use pyautoupdate)

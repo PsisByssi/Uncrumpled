@@ -14,7 +14,12 @@ system_base = {'binds': {},
 UI_API = ('status_update',
           'bind_remove',
           'show_window',
-          'welcome_screen')
+          'welcome_screen',
+          'page_load',
+          'page_close',
+          'system_hotkey_register',
+          'system_hotkey_unregister',
+          'profile_set_active')
 
 
 def make_class_name(string):

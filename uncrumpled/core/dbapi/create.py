@@ -52,10 +52,14 @@ def new_db(database):
                                           Program TEXT NOT NULL,
                                           Specific TEXT NOT NULL,
                                           Loose TEXT NOT NULL,
-                                          Symlink TEXT,
+                                          UFile TEXT,
                                           MashConfig TEXT)""")
         cur.execute(
             "CREATE UNIQUE INDEX page_name ON Pages(Profile, Book, Program, Specific, Loose)")
+
+        # Backlink from the file onto the page
+        cur.execute("""CREATE TABLE Ufiles(UFile Text NOT NULL,
+                                           Pages TEXT)""")
 
         cur.execute("INSERT INTO Profiles ('Name') VALUES ('default')")
         cur.execute("INSERT INTO DefaultOptions ('Name') VALUES ('user')")
@@ -77,9 +81,7 @@ def new_db(database):
         defaultOptions['send_hotkey'] = 1
         defaultOptions['cursor_brain'] = 'session'
 
-
         halt.insert(database, 'DefaultOptions', defaultOptions, mash=True)
-
 
         print('Setting active profile after create')
         profile_set_active(database, 'default')

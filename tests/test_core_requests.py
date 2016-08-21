@@ -20,6 +20,7 @@ from uncrumpled.core import requests as req
 from uncrumpled.core import dbapi, Core
 from util import get_all_data
 
+
 class MixIn():
     profile = 'test profile'
     book = 'test book'
@@ -58,6 +59,8 @@ class MixIn():
             res = list(res)
             if len(res) == 1:
                 return res[0]
+            if res == []:
+                return False
             return res
 
 
@@ -134,6 +137,15 @@ class TestBook(MixIn):
                                    '', self.active_profile)
         assert 'hotkey is required' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
+
+        # Hit the code path where hokteys would get reloaded, they don't as
+        # old == new, it's a state based operation, not testing for it atm
+        hotkey2 = ['f7']
+        self.run(req.profile_create, self.core, self.profile)
+        self.run(req.profile_set_active, self.core, self.profile)
+        response = self.run(req.book_create, self.core, self.profile, book2,
+                                   hotkey2, self.profile)
+
 
 
     def test_book_delete(self):
@@ -271,10 +283,10 @@ class TestHotkeys(MixIn):
         dbapi.hotkey_create(self.core.db, self.profile, self.book, hotkey2)
         response = self.run(req.hotkeys_load, self.core, self.profile)
 
-        assert response[0]['key'] == 'system_hotkey_register'
-        assert response[0]['kwargs']['hotkey'] in (self.hotkey, hotkey2)
-        assert response[1]['key'] == 'system_hotkey_register'
-        assert response[1]['kwargs']['hotkey'] in (self.hotkey, hotkey2)
+        assert response[0]['output_method'] == 'system_hotkey_register'
+        assert response[0]['output_kwargs']['hotkey'] in (self.hotkey, hotkey2)
+        assert response[1]['output_method'] == 'system_hotkey_register'
+        assert response[1]['output_kwargs']['hotkey'] in (self.hotkey, hotkey2)
 
 
     def test_hotkeys_reload(self):
@@ -285,37 +297,44 @@ class TestHotkeys(MixIn):
         dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
         response = self.run(req.hotkeys_reload, self.core, 'default', self.profile)
-        assert response[0]['key'] == 'system_hotkey_unregister'
-        assert response[1]['key'] == 'system_hotkey_register'
+        assert response[0]['output_method'] == 'system_hotkey_unregister'
+        assert response[1]['output_method'] == 'system_hotkey_register'
 
 
 class TestUiInit(MixIn):
     def test_first_run(self):
         self.first_run = True
-        responses = self.run(req.ui_init, self.core, self.first_run)
-        assert 'show_window' == responses[0]['output_method']
-        assert 'welcome_screen' == responses[1]['output_method']
-        assert 'profile_set_active' == responses[2]['key']
-        assert len(responses) == 3
+        response = self.run(req.ui_init, self.core, self.first_run)
+        assert 'show_window' == response[0]['output_method']
+        assert 'welcome_screen' == response[1]['output_method']
+        assert 'book_create' == response[2]['input_method']
+        assert 'page_create' == response[3]['input_method']
+        assert 'book_create' == response[4]['input_method']
+        assert 'profile_set_active' == response[5]['output_method']
+        assert len(response) == 8
 
+    def test_first_run_with_profile_active(self):
+        self.first_run = True
         dbapi.profile_create(self.core.db, self.profile)
         dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
-        responses = self.run(req.ui_init, self.core, self.first_run)
-        assert responses[3]['key'] == 'system_hotkey_register'
-        assert len(responses) == 4
+        response = self.run(req.ui_init, self.core, self.first_run)
+        assert response[6]['output_method'] == 'system_hotkey_register'
+        assert len(response) == 9
 
     def test_all_other_runs(self):
         self.first_run = False
-        responses = self.run(req.ui_init, self.core, self.first_run)
-        assert 'profile_set_active' == responses['key']
+        response = self.run(req.ui_init, self.core, self.first_run)
+        assert 'profile_set_active' == response['output_method']
 
+    def test_all_other_runs_with_profile_active(self):
+        self.first_run = False
         dbapi.profile_create(self.core.db, self.profile)
         dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
-        responses = self.run(req.ui_init, self.core, self.first_run)
-        assert responses[1]['key'] == 'system_hotkey_register'
-        assert len(responses) == 2
+        response = self.run(req.ui_init, self.core, self.first_run)
+        assert response[1]['output_method'] == 'system_hotkey_register'
+        assert len(response) == 2
 
 
 #TODO move to own file
@@ -346,32 +365,32 @@ class TestPageFind(MixIn):
         assert data[4] == dbapi.UNIQUE_NULL
 
 
-class TestPageWhatDo(MixIn):
+class TestNoProcess(MixIn):
     def test_basic(s):
         kwargs = {'no_process': 'shelve'}
         dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
-        resp = s.run(req.page_what_do, s.core.db, s.profile, s.book, s.program, s.hotkey)
+        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program, s.hotkey)
         assert resp is False
 
     def test_general(s):
         kwargs = {'no_process': 'write'}
         dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
-        resp = s.run(req.page_what_do, s.core.db, s.profile, s.book, s.program, s.hotkey)
+        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program, s.hotkey)
         assert resp
 
         # kwargs = {'no_process': 'loose'}
         # dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
-        # resp = s.run(req.page_what_do, s.core.db, s.profile, s.book, s.program, s.hotkey)
+        # resp = s.run(req.no_process, s.core, s.profile, s.book, s.program, s.hotkey)
 
 
     # Not sure how/what i want to do, also what about a settings file???? argh
     def test_settings_inheritance(self):
         pass
-    def test_settings_inheritance(composiiton):
+
+    def test_settings_composition(self):
         pass
 
 
-@pytest.mark.h
 class TestHotkeyPressed(MixIn):
     def test_general_page(s):
         # Test a note gets created if need be
@@ -379,13 +398,26 @@ class TestHotkeyPressed(MixIn):
         kwargs = {'no_process': 'write'}
         dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
         program, pid, = peasoup.process_exists()
-        page = (s.profile, s.book, program, None, None)
+        system = {}
 
-        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey)
-        resp['output_method'] == 'load_page'
-        assert resp['output_kwargs']['page'] == 1
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
+                     system)
+        assert resp[0]['input_method'] == 'page_create'
+
+        assert resp[1]['output_method'] == 'page_load'
+        system = {1: {'is_open': False}}
+        assert resp[1]['output_kwargs']['page_id'] == 1
 
         # Now test we can load it on the next key press
-        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey)
-        resp['output_method'] == 'load_page'
-        assert resp['output_kwargs']['page'] == 1
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
+                     system)
+        resp['output_method'] == 'page_load'
+        assert resp['output_kwargs']['page_id'] == 1
+
+
+        # Test the close signal gets sent if it is already open
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
+                     system)
+        resp['output_method'] == 'page_close'
+        assert resp['output_kwargs']['page_id'] == 1
+

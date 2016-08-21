@@ -138,7 +138,7 @@ def _page_save(profile, book, program, specific, loose):
         'Profile': profile,
         'Book': book,
         'Program': program,
-        'Symlink': None,
+        'UFile': None,
         'Specific': specific,
         'Loose': loose,
     }
@@ -148,17 +148,16 @@ def _page_save(profile, book, program, specific, loose):
 def page_create(db, profile, book, program, specific, loose):
     to_save = _page_save(profile, book, program, specific, loose)
     try:
-        halt.insert(db, 'Pages', to_save, mash=False, commit=True)
+        id = halt.insert(db, 'Pages', to_save, mash=False, commit=True)
+        return id
     except halt.HaltException:
         return False
-    return True
 
 
 def page_update(db, profile, book, program, specific, loose):
     rowid = util.page_rowid_get(db, profile, book, program, specific, loose)
     if rowid:
         to_update = _page_save(profile, book, program, specific, loose)
-    # if page in page_get_all(db):
         cond = "WHERE Id == {}".format(rowid)
         halt.update(db, 'Pages', to_update, cond=cond, mash=False)
         return True
@@ -230,3 +229,10 @@ def profile_get_all(db):
     return [x[0] for x in results]
 
 
+def ufile_create(db, page_id, file):
+    cond = "WHERE Id == '{}'".format(page_id)
+    obj = {'UFile': file}
+    halt.update(db, 'Pages', obj, cond)
+
+    obj['Pages'] = json.dumps([page_id])
+    halt.insert(db, 'UFiles', obj, mash=False)

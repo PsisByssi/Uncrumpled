@@ -7,17 +7,15 @@ import os
 from os.path import join
 import sys
 import logging
+import copy
+from contextlib import suppress
 
-import esky
 import peasoup
-import system_hotkey
 
 import kivygui
 from uncrumpled import core
 from uncrumpled.core.dbapi import create
-from uncrumpled.core.requests import hotkey_pressed
 from uncrumpled import presenter
-from uncrumpled.sideeffects import SideEffects
 
 LOG_FILE = 'log.log'
 DATABASE_FILE = 'unc.db'
@@ -26,26 +24,19 @@ DEVELOPING = True
 class MyAppBuilder(peasoup.AppBuilder):
     pass
 
-class Uncrumpled(MyAppBuilder, SideEffects):
+class Uncrumpled(MyAppBuilder):
 
     def __init__(self, *args, **kwargs):
         MyAppBuilder.__init__(self, *args, **kwargs)
 
-    def hotkey_consumer(self, ev, hotkey, args):
-        program, pid, = peasoup.process_exists()
-        profile = self.active_profile
-        resp = uncrumpled_request(hotkey_pressed(hotkey, program, hotkey))
-        self.gui.main_window.unc_load_file(resp)
-
-
     def start(self):
         self.data_dir = self.setup_data_dir()
-        self.db = os.path.join(self.data_dir, DATABASE_FILE)
-        # self.hk =
-        # self.tray =
-        self.hk = system_hotkey.SystemHotkey(consumer=self.hotkey_consumer,
-                                             check_queue_interval=0.001)
-        self.hk.register(['f5'])
+        self.db = join(self.data_dir, DATABASE_FILE)
+        self.notedir = join(self.data_dir, 'notes')
+        os.makedirs(self.notedir, exist_ok=True)
+
+        self.SYSTEM = copy.deepcopy(presenter.util.system_base)
+
         self.setup_config(self.data_dir)
 
         if not os.path.isfile(self.db):
@@ -55,12 +46,12 @@ class Uncrumpled(MyAppBuilder, SideEffects):
         else:
             logging.info('Database file detected!: %s' % self.db)
 
-        os.chdir(os.path.dirname(kivygui.__file__))
         self.core = core.Core(self.db)
+        os.chdir(os.path.dirname(kivygui.__file__))
         self.gui = kivygui.KivyGui()
         self.gui.start(self)
 
-    def setup_data_dir(self):
+    def setup_data_dir(self): #TODO delete, just for testing
         if not DEVELOPING:
             return self.get_appdir(portable_path=os.path.dirname(__file__))
         else:
@@ -73,42 +64,41 @@ class Uncrumpled(MyAppBuilder, SideEffects):
 
     def setup_config(self, data_dir):
         '''some magic done by peasoup'''
-        cfg_file = os.path.abspath(join(self.data_dir, self.pcfg['config_file']))
+        cfg_file = join(self.data_dir, self.pcfg['config_file'])
         self.create_cfg(cfg_file)
         logging.info('First time run?: ' + str( self.first_run))
 
 
-
 if __name__ == '__main__':
+
     if len(sys.argv) == 2 and sys.argv[1] == 'developing':
         DEVELOPING = True
     if DEVELOPING:
         sys.setrecursionlimit(200)
 
-    app_framework_instance = MyAppBuilder(main_file=MyAppBuilder.rel_path('__file__'))
+    # Setup logging in correct location
+    helper = MyAppBuilder(main_file=MyAppBuilder.rel_path('__file__'))
     LOG_FILE = peasoup.add_date(LOG_FILE)
-    DATA_DIR = app_framework_instance.get_appdir(portable_path=os.path.realpath(os.path.dirname(__file__)), create=True)
-    LOG_FILE = app_framework_instance.init_file(DATA_DIR, LOG_FILE)
+    DATA_DIR = helper.get_appdir(portable_path=
+                                 os.path.realpath(os.path.dirname(__file__)),
+                                 create=True)
+    LOG_FILE = helper.init_file(DATA_DIR, LOG_FILE)
     peasoup.setup_logger(LOG_FILE)
+
+    # Exception monitoring with sentry
     if not DEVELOPING:
         with suppress(Exception):
             raven_client = peasoup.setup_raven()
-    logging.info('Developer status is: %s' % DEVELOPING)
 
+    logging.info('Developer status is: %s' % DEVELOPING)
     try:
         main = Uncrumpled(main_file=MyAppBuilder.rel_path('__file__'))
-        # THIS NEEDS TO BE SAVED!  DISGUSTING MAN...
-        main.pcfg['log_file'] = LOG_FILE
+        main.pcfg['log_file'] = LOG_FILE # TODO
         main.start()
     except (Exception, KeyboardInterrupt) as err:
-        main.logexception(logger=main.logger)
-        # if not DEVELOPING:
-        #     with suppress(Exception):
-        #         raven_client.captureException()
-
-        restarter = peasoup.Restarter()
-
+        # main.logexception(logger=main.logger)
         if not DEVELOPING:
             with suppress(Exception):
                 raven_client.captureException()
+        # restarter = peasoup.Restarter()
 

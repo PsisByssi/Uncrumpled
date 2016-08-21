@@ -1,10 +1,28 @@
 
 import os
 import asyncio
+from functools import wraps
 
-from uncrumpled.core import responses
-from uncrumpled.core import requests
-from uncrumpled.core import dbapi
+# from uncrumpled.core import responses
+# from uncrumpled.core import requests
+# from uncrumpled.core import dbapi
+
+
+def core_request(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Args are not exposed to the gui/plugins etc
+        # they are provided by the presenter and are thus already known
+        response = func(*args, **kwargs)
+        for aresp in response:
+            # A toplevel request
+            if not aresp.get('input_method'):
+                data = {'input_method': func.__name__,
+                        'input_kwargs': kwargs}
+                yield dict(aresp, **data)
+            else:
+                yield aresp
+    return wrapper
 
 
 class Core():

@@ -22,8 +22,6 @@ from collections import Iterable
 from uncrumpled.presenter import responses
 from uncrumpled.presenter import util
 
-SYSTEM = dict(util.system_base)
-
 
 def uncrumpled_request(func):
     '''
@@ -34,7 +32,7 @@ def uncrumpled_request(func):
     '''
     # @asyncio.coroutine #ASYNC
     def wrapper(app, *args, **kwargs):
-        # core_response = yield from func(app.core, *args, **kwargs)# ASYNC
+        # core_response = yield from func(app, *args, **kwargs)# ASYNC
         core_responses = func(app, *args, **kwargs)
         result = []
         for resp in core_responses:
@@ -51,8 +49,8 @@ def update_system(app, response):
     takes a update to the system dict from the uncrumpled core
     adds it the the system config in proper format
     '''
-    class_name = util.make_class_name(response['input_method'])
-    response_handler = eval('responses.{}(SYSTEM, response)'.format(class_name))
+    cls = util.make_class_name(response['input_method'])
+    response_handler = eval('responses.{}(app.SYSTEM, response, app)'.format(cls))
     response_handler.add_to_system()
     # Do side effects if required i.e system hotkeys etc
     if response['output_method'] == 'noop':
