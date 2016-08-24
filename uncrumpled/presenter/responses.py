@@ -2,10 +2,10 @@
     Handles repsonse forom the uncrumpled core
 '''
 
+from os.path import join
 from collections import defaultdict
 
 from uncrumpled.presenter.util import UI_API
-
 from uncrumpled import core
 
 
@@ -81,7 +81,8 @@ class PageCreate(ResponseHandler):
         page_id = self.response['page_id']
         init_text = self.response.get('init_text')
         file = core.util.ufile_create(self.app, page_id, init_text)
-        self.system['pages'][page_id] = {'is_open': False, 'file': file}
+        self.system['pages'][page_id] = {'is_open': False,
+                                        'file': join(self.app.notedir, file)}
 
 
 class ProfileCreate(ResponseHandler):
@@ -124,7 +125,8 @@ class HotkeyPressed(ResponseHandler):
         existing = self.system['pages'].get(page_id)
         if not existing:
             file = core.util.ufile_get(self.app.db, page_id)
-            self.system['pages'][page_id] = {'is_open': True, 'file': file}
+            self.system['pages'][page_id] = {'is_open': True,
+                    'file': join(self.app.notedir, file)}
         else:
             self.system['pages'][page_id]['is_open'] = True
 

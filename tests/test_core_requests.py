@@ -320,6 +320,7 @@ class TestUiInit(MixIn):
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
         response = self.run(req.ui_init, self.core, self.first_run)
         assert response[6]['output_method'] == 'system_hotkey_register'
+        assert response[7]['output_method'] == 'system_hotkey_register'
         assert len(response) == 9
 
     def test_all_other_runs(self):
