@@ -88,6 +88,7 @@ class TestPage():
         assert self.system['pages'][self.page_id]['file']
 
 
+@pytest.mark.ab
 class TestLoadPage():
     profile = 'test profile'
     book = 'test book'
@@ -110,14 +111,14 @@ class TestLoadPage():
 
         s.response['input_method'] = 'hotkey_pressed'
         s.response['output_method'] = 'page_load'
-        handler = resp.HotkeyPressed(s.system, s.response, s.app)
+        handler = resp.PageLoad(s.system, s.response, s.app)
         handler.add_to_system()
         assert s.page_id in s.system['pages']
         assert s.system['pages'][s.page_id]['is_open']
 
         s.response['input_method'] = 'hotkey_pressed'
         s.response['output_method'] = 'page_close'
-        handler = resp.HotkeyPressed(s.system, s.response, s.app)
+        handler = resp.PageClose(s.system, s.response, s.app)
         handler.add_to_system()
         assert s.page_id in s.system['pages']
         assert not s.system['pages'][s.page_id]['is_open']

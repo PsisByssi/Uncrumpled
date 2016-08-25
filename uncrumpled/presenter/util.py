@@ -27,7 +27,6 @@ def make_class_name(string):
     parts = string.split('_')
     return ''.join(x.capitalize() for x in parts)
 
-
 def traverse(o, tree_types=(list, tuple, GeneratorType)):
     if isinstance(o, tree_types):
         for value in o:

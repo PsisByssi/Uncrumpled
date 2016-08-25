@@ -50,7 +50,6 @@ class Mixin():
         return res
         # return self.event_loop.run_until_complete(func())
 
-
 class TestProfile(Mixin):
     # @asyncio.coroutine #ASYNC hmm, do not think this is needed
     def test_profile(self):
@@ -73,9 +72,10 @@ class TestUiInit(Mixin):
         response = self.run(req.ui_init, self.app)
         assert 'show_window' in response[0]
         assert 'welcome_screen' in response[1]
-        assert 'profile_set_active' in response[2]
-        assert 'system_hotkey_register' in response[3]
+        assert 'page_load' in response[2]
+        assert 'profile_set_active' in response[3]
         assert 'system_hotkey_register' in response[4]
+        assert 'system_hotkey_register' in response[5]
 
     def test_with_first_run_false(self):
         self.app.first_run = False
@@ -83,6 +83,7 @@ class TestUiInit(Mixin):
         assert 'profile_set_active' in response
 
 
+@pytest.mark.ab
 class TestHotkeyPressed(Mixin):
     def test_page_load_and_page_close(s):
         dbapi.profile_create(s.app.db, s.profile)

@@ -107,7 +107,7 @@ def no_process(core, profile, book, program, hotkey):
     return rowid
 
 
-@core_request
+@core_request()
 def hotkey_pressed(core, profile, program, hotkey, system_pages):
     '''
     profile -> active profile
@@ -130,7 +130,7 @@ def hotkey_pressed(core, profile, program, hotkey, system_pages):
             aresp = next(response)
             yield aresp
             page_id = yield from response
-            yield resp.resp('page_load', page_id=page_id, initialize=True)
+            yield resp.resp('page_load', page_id=page_id)
         else:
             yield False
     else:

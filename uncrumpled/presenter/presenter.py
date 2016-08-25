@@ -49,13 +49,12 @@ def update_system(app, response):
     takes a update to the system dict from the uncrumpled core
     adds it the the system config in proper format
     '''
-    cls = util.make_class_name(response['input_method'])
-    response_handler = eval('responses.{}(app.SYSTEM, response, app)'.format(cls))
-    response_handler.add_to_system()
-    # Do side effects if required i.e system hotkeys etc
-    if response['output_method'] == 'noop':
-        try:
-            eval('app.{}(**kwargs)'.format(response['key'], response['kwargs']))
-        except Exception as err:
-            pass
-    return response_handler
+    cls = util.make_class_name(response['resp_id'])
+    try:
+        response_handler = eval('responses.{}(app.SYSTEM, response, app)'
+                            .format(cls))
+    except AttributeError:
+        pass
+    else:
+        response_handler.add_to_system()
+        return response_handler

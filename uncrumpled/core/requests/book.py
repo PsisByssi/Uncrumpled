@@ -5,7 +5,7 @@ from uncrumpled.core import requests as req
 
 
 # TODO yield request to make the book....
-@core_request
+@core_request(is_resp_id=True)
 def book_create(app, profile, book, hotkey, active_profile, **kwargs):
     try:
         dbapi.book_create(app.db, profile, book, hotkey, **kwargs)
@@ -22,7 +22,7 @@ def book_create(app, profile, book, hotkey, active_profile, **kwargs):
         yield resp.status(key='book_created', code=1, template={'book': book})
 
 
-@core_request
+@core_request(is_resp_id=True)
 def book_delete(app, book, profile):
     if dbapi.book_delete(app.db, book, profile):
         # Close any open windows # TODO

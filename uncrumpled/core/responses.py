@@ -41,18 +41,19 @@ def status(key, code, template=None, **data):
 # no operation on the ui, system operations are allowed
 def noop(key=None, **data):
     '''key is only used for testing, it is a return code'''
-    return dict({'output_method': 'noop', 'key': key, 'kwargs': data})
+    return dict({'output_method': key, 'noop': True, 'kwargs': data})
 
 
 def noopify(response):
     '''
+    :response: a response from a request, this response can generate
+        other responses and will get handled correctly
+
     turn an uncrumpled response to noop, (instead of doing a ui action,
     the response will be handled excalty the same but without the ui action)
-
-    these resposnes can call other requests
     '''
     for aresp in response:
-        aresp['output_method'] = 'noop'
+        aresp['noop'] = True
         yield aresp
 
 
@@ -65,8 +66,12 @@ _UI = ('show_window',
        'system_hotkey_unregister',
         )
 
-def resp(method, **kwargs):
-    '''this is for arbitrary ui actions,
+def resp(method, resp_id=None, **kwargs):
+    '''
+    :resp_id: a unique id for this response
+    this is for running arbitrary response handlers,
     the response is unable to call other requests'''
     assert method in _UI, 'Add method to_ui: ' +method
-    return {'output_method': method, 'output_kwargs': kwargs}
+    if not resp_id:
+        resp_id = method
+    return {'resp_id': resp_id, 'output_method': method, 'output_kwargs': kwargs}

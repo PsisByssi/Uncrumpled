@@ -1,5 +1,4 @@
 
-import os
 import asyncio
 from functools import wraps
 
@@ -8,23 +7,25 @@ from functools import wraps
 # from uncrumpled.core import dbapi
 
 
-def core_request(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        # Args are not exposed to the gui/plugins etc
-        # they are provided by the presenter and are thus already known
-        response = func(*args, **kwargs)
-        for aresp in response:
-            # A toplevel request
-            if not aresp.get('input_method'):
-                data = {'input_method': func.__name__,
-                        'input_kwargs': kwargs}
-                yield dict(aresp, **data)
-            else:
-                yield aresp
+def core_request(is_resp_id=False):
+    def wrapper(func):
+        def _core_request(*args, **kwargs):
+            data = {}
+            if is_resp_id:
+                data['resp_id'] = func.__name__
+            response = func(*args, **kwargs)
+            for aresp in response:
+                # A toplevel request
+                if not aresp.get('input_method'):
+                    data['input_method'] = func.__name__
+                    data['input_kwargs'] = kwargs
+                    yield dict(aresp, **data)
+                else:
+                    yield aresp
+        return _core_request
     return wrapper
 
-
+#################### DEL
 class Core():
     def __init__(self, db):
         self.db = db

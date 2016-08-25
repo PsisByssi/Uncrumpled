@@ -3,7 +3,7 @@ from uncrumpled.core import core_request
 from uncrumpled.core import responses as resp
 
 
-@core_request
+@core_request(is_resp_id=True)
 def profile_create(core, profile):
     if dbapi.profile_create(core.db, profile):
         yield resp.status(key='profile_created',
@@ -15,7 +15,7 @@ def profile_create(core, profile):
                            template={'profile': profile})
 
 
-@core_request
+@core_request(is_resp_id=True)
 def profile_delete(core, profile):
     if dbapi.profile_delete(core.db, profile):
         yield resp.status(key='profile_deleted',
@@ -27,13 +27,13 @@ def profile_delete(core, profile):
                            template={'profile': profile})
 
 
-@core_request
+@core_request(is_resp_id=True)
 def profile_get_active(core):
     dbapi.profile_get_active(core.db)
     yield resp.noop(key='profile_gotten')
 
 
-@core_request
+@core_request(is_resp_id=True)
 def profile_set_active(core, profile):
     dbapi.profile_set_active(core.db, profile)
     yield resp.status(key='profile_changed',

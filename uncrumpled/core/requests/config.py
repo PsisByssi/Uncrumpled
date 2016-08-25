@@ -49,7 +49,7 @@ init_text = '''
         If you run into any problems please report them on `Github`!
         '''.format(key1=key1, key2=key2)
 
-@core_request
+@core_request()
 def ui_init(core, first_run, user_or_token=None, password=None):
     '''
     Code for startup
@@ -67,12 +67,14 @@ def ui_init(core, first_run, user_or_token=None, password=None):
         for aresp in resp.noopify(req.page_create(core, profile='default',
                               book='learning', program='uncrumpled',
                               init_text=init_text)):
+            page_id = aresp['page_id']
             yield aresp
 
         for aresp in resp.noopify(req.book_create(core, profile='default',
                               book='scratchpad', hotkey=['f3'],
                               active_profile='default', no_process='read')):
             yield aresp
+        yield resp.resp('page_load', page_id=page_id)
 
     # if data.get('new_user'):
         # yield config.new_user(data)

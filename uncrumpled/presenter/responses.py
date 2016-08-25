@@ -1,5 +1,7 @@
 '''
     Handles repsonse forom the uncrumpled core
+
+    The output_method and or / input_method from the core is the class names
 '''
 
 from os.path import join
@@ -7,7 +9,7 @@ from collections import defaultdict
 
 from uncrumpled.presenter.util import UI_API
 from uncrumpled import core
-
+from uncrumpled.presenter import util
 
 class ResponseHandler():
     def __init__(self, system, response, app=None):
@@ -24,13 +26,12 @@ class ResponseHandler():
         :return: string to be evaled
         '''
         method = self.response.get('output_method')
-
-        if not method or method == 'noop':
+        if not method or self.response.get('noop'):
             return
-        elif method not in UI_API:
-            raise Exception('method not supported by UI: ' + method)
-
         return '{}(**{})'.format(method, self.response['output_kwargs'])
+
+    def add_to_system(self):
+        pass
 
 
 class BindAdd(ResponseHandler):
@@ -71,9 +72,7 @@ class BindRemove(ResponseHandler):
                 break
 
 
-class BookCreate(ResponseHandler):
-    def add_to_system(self):
-        pass
+class BookCreate(ResponseHandler): pass
 
 
 class PageCreate(ResponseHandler):
@@ -94,47 +93,49 @@ class ProfileDelete(ResponseHandler):
     def add_to_system(self):
         self.system['profiles'].append(self.response['input_kwargs']['profile'])
 
+class ProfileSetActive(ResponseHandler): pass
+class ProfileGetActive(ResponseHandler): pass
 
-class ProfileSetActive(ResponseHandler):
-    def add_to_system(self):
-        pass
-
-
-class ProfileGetActive(ResponseHandler):
-    def add_to_system(self):
-        pass
-
-
-class UiInit(ResponseHandler):
-    def add_to_system(self):
-        pass
-
-
-class HotkeyPressed(ResponseHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.response['output_method'] == 'page_load':
-            self.add_to_system = self._page_load
-        else:
-            self.add_to_system = self._page_close
-
+class PageLoad(ResponseHandler):
     # input format: {rowid: #, }
     # after: sys = {pages: {id: {is_open: bool, file: ""}}}
-    def _page_load(self):
+    def add_to_system(self):
         page_id = self.response['output_kwargs']['page_id']
         existing = self.system['pages'].get(page_id)
         if not existing:
             file = core.util.ufile_get(self.app.db, page_id)
             self.system['pages'][page_id] = {'is_open': True,
                     'file': join(self.app.notedir, file)}
+            self.response['output_kwargs']['file'] = file
         else:
             self.system['pages'][page_id]['is_open'] = True
+        self.page_id = page_id
 
-    def _page_close(self):
+    def partial_ui_update(self):
+        method = self.response.get('output_method')
+        file = self.system['pages'][self.page_id]['file']
+        return "{}(file='{}')".format(method, file)
+
+
+class PageClose(ResponseHandler):
+    def add_to_system(self):
         page_id = self.response['output_kwargs']['page_id']
         self.system['pages'][page_id]['is_open'] = False
+        self.page_id = page_id
+
+    def partial_ui_update(self):
+        method = self.response.get('output_method')
+        file = self.system['pages'][self.page_id]['file']
+        return "{}(file='{}')".format(method, file)
 
 
-class HotkeysLoad(ResponseHandler):
-    def add_to_system(self):
-        pass
+# TODO, isthere a more elegant way for the core
+class HotkeyPressed(ResponseHandler): pass
+
+class HotkeysLoad(ResponseHandler): pass
+
+class StatusUpdate(ResponseHandler): pass
+
+class ShowWindow(ResponseHandler): pass
+
+class WelcomeScreen(ResponseHandler): pass

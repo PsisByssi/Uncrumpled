@@ -234,41 +234,41 @@ class TestHotkeys(MixIn):
     def test_hotkey_create(self):
         response = self.run(req.hotkey_create, self.core, self.profile, self.book,
                                      self.hotkey)
-        assert 'created' in response['key']
+        assert 'hotkey_created' == response['output_method']
 
         response = self.run(req.hotkey_create, self.core, self.profile, self.book,
                                      self.hotkey)
-        assert 'taken' in response['key']
+        assert 'hotkey_taken' in response['output_method']
 
 
     def test_hotkey_delete(self):
         response = self.run(req.hotkey_delete, self.core, self.profile, self.book,
                                      self.hotkey)
-        assert 'not_found' in response['key']
+        assert 'hotkey_not_found' in response['output_method']
 
         response = self.run(req.hotkey_create, self.core, self.profile, self.book,
                                      self.hotkey)
 
         response = self.run(req.hotkey_delete, self.core, self.profile, self.book,
                                      self.hotkey)
-        assert 'deleted' in response['key']
+        assert 'hotkey_deleted' in response['output_method']
 
 
     def test_hotkey_updated(self):
         response = self.run(req.hotkey_update, self.core, self.profile, self.book,
                                      self.hotkey)
-        assert 'not_found' in response['key']
+        assert 'hotkey_not_found' in response['output_method']
 
         response = self.run(req.hotkey_create, self.core, self.profile, self.book,
                                      self.hotkey)
 
         response = self.run(req.hotkey_update, self.core, self.profile, self.book,
                                      self.hotkey)
-        assert 'updated' in response['key']
+        assert 'hotkey_updated' in response['output_method']
         hotkey2 = ['f11']
         response = self.run(req.hotkey_update, self.core, self.profile, self.book,
                                      hotkey2)
-        assert 'not_found' in response['key']
+        assert 'hotkey_not_found' in response['output_method']
 
 
     def test_hotkey_load(self):
@@ -310,8 +310,9 @@ class TestUiInit(MixIn):
         assert 'book_create' == response[2]['input_method']
         assert 'page_create' == response[3]['input_method']
         assert 'book_create' == response[4]['input_method']
-        assert 'profile_set_active' == response[5]['output_method']
-        assert len(response) == 8
+        assert 'page_load' == response[5]['output_method']
+        assert 'profile_set_active' == response[6]['output_method']
+        assert len(response) == 9
 
     def test_first_run_with_profile_active(self):
         self.first_run = True
@@ -319,9 +320,9 @@ class TestUiInit(MixIn):
         dbapi.hotkey_create(self.core.db, 'default', self.book, self.hotkey)
         dbapi.hotkey_create(self.core.db, self.profile, self.book, self.hotkey)
         response = self.run(req.ui_init, self.core, self.first_run)
-        assert response[6]['output_method'] == 'system_hotkey_register'
         assert response[7]['output_method'] == 'system_hotkey_register'
-        assert len(response) == 9
+        assert response[8]['output_method'] == 'system_hotkey_register'
+        assert len(response) == 10
 
     def test_all_other_runs(self):
         self.first_run = False

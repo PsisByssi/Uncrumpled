@@ -6,7 +6,7 @@ from uncrumpled.core import core_request
 from uncrumpled.core import responses as resp
 
 
-@core_request
+@core_request(is_resp_id=True)
 def hotkey_create(core, profile, book, hotkey):
     if dbapi.hotkey_create(core.db, profile, book, hotkey):
         yield resp.noop(key='hotkey_created')
@@ -14,7 +14,7 @@ def hotkey_create(core, profile, book, hotkey):
         yield resp.noop(key='hotkey_taken')
 
 
-@core_request
+@core_request(is_resp_id=True)
 def hotkey_delete(core, profile, book, hotkey):
     if dbapi.hotkey_delete(core.db, profile, book, hotkey):
         yield resp.noop(key='hotkey_deleted')
@@ -22,7 +22,7 @@ def hotkey_delete(core, profile, book, hotkey):
         yield resp.noop(key='hotkey_not_found')
 
 
-@core_request
+@core_request(is_resp_id=True)
 def hotkey_update(core, profile, book, hotkey):
     if dbapi.hotkey_update(core.db, profile, book, hotkey):
         yield resp.noop(key='hotkey_updated')
@@ -30,7 +30,7 @@ def hotkey_update(core, profile, book, hotkey):
         yield resp.noop(key='hotkey_not_found')
 
 
-@core_request
+@core_request(is_resp_id=True)
 def hotkeys_load(core, active_profile):
     '''
     only use this at startup, init system wide hotkeys for the active profile
@@ -39,7 +39,7 @@ def hotkeys_load(core, active_profile):
         yield resp.resp('system_hotkey_register', hotkey=hotkey)
 
 
-@core_request
+@core_request(is_resp_id=True)
 def hotkeys_reload(core, old, new):
     '''
     changes the active system hotkeys based on the profiles

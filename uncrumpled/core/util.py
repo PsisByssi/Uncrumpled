@@ -47,6 +47,7 @@ def ufile_create(app, page_id, init_text=None):
     fname = _rand_name_in_dir(app.notedir) + '.uncrumpled'
     dbapi.ufile_create(app.db, page_id, fname)
 
+    # import pdb;pdb.set_trace()
     if init_text:
         with open(os.path.join(app.notedir, fname), 'w') as f:
             f.write(init_text)
