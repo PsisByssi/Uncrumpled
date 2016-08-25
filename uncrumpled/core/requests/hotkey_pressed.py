@@ -13,6 +13,8 @@ from uncrumpled.core import core_request
 from uncrumpled.core import responses as resp
 from uncrumpled.core import requests as req
 
+DEVELOPING = False
+
 def page_specific_match(current, page):
     pass
 
@@ -38,6 +40,11 @@ def page_find(db, profile, book, program):
     if a specific page exists, returns that,
     otherwise a general page if one exists
     '''
+    #TODO del
+    global DEVELOPING
+    if DEVELOPING and program in ('python3', 'python'):
+        program = 'uncrumpled'
+
     general = False
     for rowid, specific in page_itr(db, profile, book, program):
         if specific == dbapi.UNIQUE_NULL:
@@ -108,7 +115,7 @@ def no_process(core, profile, book, program, hotkey):
 
 
 @core_request()
-def hotkey_pressed(core, profile, program, hotkey, system_pages):
+def hotkey_pressed(app, profile, program, hotkey, system_pages):
     '''
     profile -> active profile
     hotkey -> the pressed hotkey
@@ -117,15 +124,18 @@ def hotkey_pressed(core, profile, program, hotkey, system_pages):
     * load an existing page
     * create a page, (optionally load it)
     '''
+    # TODO DELETE
+    global DEVELOPING
+    DEVELOPING = app.DEVELOPING
 
     hotkey = json.dumps(hotkey)
     cond = "WHERE Hotkey == '{}' AND \
                   Profile == '{}'".format(hotkey, profile)
-    book = halt.load_column(core.db, 'Hotkeys', ('Book',), cond)[0][0]
+    book = halt.load_column(app.db, 'Hotkeys', ('Book',), cond)[0][0]
 
-    page_id = page_find(core.db, profile, book, program)
+    page_id = page_find(app.db, profile, book, program)
     if not page_id:
-        response = no_process(core, profile, book, program, hotkey)
+        response = no_process(app, profile, book, program, hotkey)
         if response:
             aresp = next(response)
             yield aresp
