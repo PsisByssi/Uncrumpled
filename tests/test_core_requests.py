@@ -305,7 +305,7 @@ class TestUiInit(MixIn):
     def test_first_run(self):
         self.first_run = True
         response = self.run(req.ui_init, self.core, self.first_run)
-        assert 'show_window' == response[0]['output_method']
+        assert 'window_show' == response[0]['output_method']
         assert 'welcome_screen' == response[1]['output_method']
         assert 'book_create' == response[2]['input_method']
         assert 'page_create' == response[3]['input_method']
@@ -400,26 +400,21 @@ class TestHotkeyPressed(MixIn):
         kwargs = {'no_process': 'write'}
         dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
         program, pid, = peasoup.process_exists()
-        system = {}
 
+        # just a dummy valie
+        system = {}
         resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
                      system)
         assert resp[0]['input_method'] == 'page_create'
 
         assert resp[1]['output_method'] == 'page_load'
-        system = {1: {'is_open': False}}
+
+        # just a dummy value
+        system = {1: {'is_open': True}}
         assert resp[1]['output_kwargs']['page_id'] == 1
 
-        # Now test we can load it on the next key press
+        # Now test we can close it on the next key press
         resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
                      system)
-        resp['output_method'] == 'page_load'
-        assert resp['output_kwargs']['page_id'] == 1
-
-
-        # Test the close signal gets sent if it is already open
-        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
-                     system)
-        resp['output_method'] == 'page_close'
-        assert resp['output_kwargs']['page_id'] == 1
-
+        assert resp[0]['output_method'] == 'page_close'
+        assert resp[1]['output_method'] == 'window_hide'

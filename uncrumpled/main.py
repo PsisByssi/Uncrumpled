@@ -2,7 +2,6 @@
     Kicks off the Boring Application stuff.
     Settuping up logging etc
 '''
-
 import os
 from os.path import join
 import sys

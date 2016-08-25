@@ -136,5 +136,6 @@ def hotkey_pressed(core, profile, program, hotkey, system_pages):
     else:
         if system_pages[page_id]['is_open']:
             yield resp.resp('page_close', page_id=page_id)
+            yield resp.resp('window_hide')
         else:
             yield resp.resp('page_load', page_id=page_id)

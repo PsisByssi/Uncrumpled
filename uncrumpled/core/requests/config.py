@@ -55,7 +55,7 @@ def ui_init(core, first_run, user_or_token=None, password=None):
     Code for startup
     '''
     if first_run:
-        yield resp.resp('show_window')
+        yield resp.resp('window_show')
         yield resp.resp('welcome_screen')
 
         for aresp in resp.noopify(req.book_create(core, profile='default',

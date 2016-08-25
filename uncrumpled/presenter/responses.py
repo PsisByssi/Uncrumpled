@@ -94,6 +94,7 @@ class ProfileDelete(ResponseHandler):
         self.system['profiles'].append(self.response['input_kwargs']['profile'])
 
 class ProfileSetActive(ResponseHandler): pass
+
 class ProfileGetActive(ResponseHandler): pass
 
 class PageLoad(ResponseHandler):
@@ -128,14 +129,7 @@ class PageClose(ResponseHandler):
         file = self.system['pages'][self.page_id]['file']
         return "{}(file='{}')".format(method, file)
 
-
-# TODO, isthere a more elegant way for the core
-class HotkeyPressed(ResponseHandler): pass
-
-class HotkeysLoad(ResponseHandler): pass
-
-class StatusUpdate(ResponseHandler): pass
-
-class ShowWindow(ResponseHandler): pass
-
+class WindowShow(ResponseHandler): pass
+class WindowHide(ResponseHandler): pass
 class WelcomeScreen(ResponseHandler): pass
+class HotkeysLoad(ResponseHandler): pass

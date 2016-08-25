@@ -57,7 +57,8 @@ def noopify(response):
         yield aresp
 
 
-_UI = ('show_window',
+_UI = ('window_show',
+       'window_hide',
        'welcome_screen',
        'profile_set_active',
        'page_load',

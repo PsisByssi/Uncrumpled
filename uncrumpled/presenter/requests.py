@@ -42,3 +42,7 @@ def hotkey_pressed(app, profile, program, hotkey):
     system_page = app.SYSTEM['pages']
     response = req.hotkey_pressed(app, profile, program, hotkey, system_page)
     return response
+
+def system_get(app):
+    '''for debugging'''
+    return ["system_gotten(system={})".format(app.SYSTEM)]

@@ -88,7 +88,6 @@ class TestPage():
         assert self.system['pages'][self.page_id]['file']
 
 
-@pytest.mark.ab
 class TestLoadPage():
     profile = 'test profile'
     book = 'test book'
@@ -107,9 +106,11 @@ class TestLoadPage():
     def test_load_page_and_close_page(s):
         s.page_id = dbapi.page_create(s.app.db, s.profile, s.program, s.program,
                                         s.specific, s.loose)
-        core.util.ufile_create(s.app, s.page_id)
 
-        s.response['input_method'] = 'hotkey_pressed'
+        # file has to be previosly created, the setup is done as in pagecreate
+        file = core.util.ufile_create(s.app, s.page_id)
+        s.system = {'pages': {s.page_id: {'is_open': False, 'file': file}}}
+
         s.response['output_method'] = 'page_load'
         handler = resp.PageLoad(s.system, s.response, s.app)
         handler.add_to_system()
@@ -122,3 +123,24 @@ class TestLoadPage():
         handler.add_to_system()
         assert s.page_id in s.system['pages']
         assert not s.system['pages'][s.page_id]['is_open']
+
+
+# @pytest.mark.ab
+# class TestUiInit():
+    # profile = 'test profile'
+    # book = 'test book'
+    # program = 'testprogram'
+    # hotkey = ['f5']
+    # specific = None
+    # loose = None
+    # def setup_class(cls):
+        # cls.page_id = 1
+        # cls.response = {'output_kwargs': {'page_id': cls.page_id}}
+        # cls.app = App()
+
+    # def setup_method(self, func):
+        # self.system = copy.deepcopy(system_base)
+
+    # def test_first_run(s):
+        # handler = resp.Ui(s.system, s.response, s.app)
+        # import pdb;pdb.set_trace()

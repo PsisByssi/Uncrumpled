@@ -37,6 +37,8 @@ def uncrumpled_request(func):
         result = []
         for resp in core_responses:
             resp_handler = update_system(app, resp)
+            if not resp_handler:
+                raise Exception('Create handler for ' + resp)
             _res =resp_handler.partial_ui_update()
             if _res:
                 result.append(_res)
