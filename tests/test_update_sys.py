@@ -125,7 +125,6 @@ class TestLoadPage():
         assert not s.system['pages'][s.page_id]['is_open']
 
 
-# @pytest.mark.ab
 # class TestUiInit():
     # profile = 'test profile'
     # book = 'test book'

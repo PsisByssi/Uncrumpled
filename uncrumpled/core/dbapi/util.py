@@ -18,20 +18,6 @@ def page_validate(profile, book, program, specific, loose):
     return (profile, book, program, specific, loose)
 
 
-def page_rowid_get(db, profile, book, program, specific, loose):
-    page = page_validate(profile, book, program, specific, loose)
-    cond = "WHERE Profile == '{}' AND \
-                  Book == '{}' AND \
-                  Program == '{}' AND \
-                  Specific == '{}' AND \
-                  Loose == '{}'".format(*page)
-    rowid = halt.load_column(db, 'Pages', ('Id',), cond=cond)
-    if not rowid:
-        return False
-    else:
-        return rowid[0][0]
-
-
 def page_info(db, page_id, rv=list): # TODO delete?
     '''given a page_id, get all page info in as a tuple or dictionary'''
     assert rv in (list, dict)

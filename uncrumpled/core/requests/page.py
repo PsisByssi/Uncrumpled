@@ -11,7 +11,9 @@ def page_create(core, profile, book, program, specific=None, loose=None,
         yield resp.status(key='page_created', code=1, page_id=id,
                           init_text=init_text)
     else:
-        yield resp.status(key='page_taken', code=0)
+        id = dbapi.page_rowid_get(core.db, profile, book, program, specific,
+                                  loose)
+        yield resp.status(key='page_taken', code=0, page_id=id)
 
 
 @core_request(is_resp_id=True)

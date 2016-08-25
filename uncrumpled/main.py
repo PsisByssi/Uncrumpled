@@ -29,6 +29,7 @@ class Uncrumpled(MyAppBuilder):
         MyAppBuilder.__init__(self, *args, **kwargs)
 
     def start(self):
+        self.DEVELOPING = DEVELOPING
         self.data_dir = self.setup_data_dir()
         self.db = join(self.data_dir, DATABASE_FILE)
         self.notedir = join(self.data_dir, 'notes')

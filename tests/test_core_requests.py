@@ -1,9 +1,5 @@
 '''
     Tests requests against the core
-
-    We only check the messages are correct,
-    There are a few asserts for database stuff but those
-    should be deleted if i need to do some db tests
 '''
 
 import asyncio
@@ -175,15 +171,13 @@ class TestPage(MixIn):
                                    self.program, self.specific)
         assert 'page created' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] == 1
-        data = get_all_data(self.core.db, 'Pages')[0]
-        assert data[1] == self.profile
-        assert data[2] == self.book
-        assert data[3] == self.program
+        assert response['page_id'] == 1
 
         response = self.run(req.page_create, self.core, self.profile, self.book,
                                    self.program, self.specific)
         assert 'page already' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
+        assert response['page_id'] == 1
 
 
     def test_page_delete(self):
@@ -366,7 +360,6 @@ class TestPageFind(MixIn):
         assert data[3] == self.program
         assert data[4] == dbapi.UNIQUE_NULL
 
-
 class TestNoProcess(MixIn):
     def test_basic(s):
         kwargs = {'no_process': 'shelve'}
@@ -377,13 +370,30 @@ class TestNoProcess(MixIn):
     def test_general(s):
         kwargs = {'no_process': 'write'}
         dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
-        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program, s.hotkey)
-        assert resp
+        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program,
+                     s.hotkey)
+        assert resp['page_id'] == 1
+        assert resp['resp_id'] == 'page_create'
+        assert resp['output_kwargs']['code'] == 1
+        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program,
+                     s.hotkey)
+        assert resp['page_id'] == 1
+        assert resp['resp_id'] == 'page_create'
+        assert resp['output_kwargs']['code'] == 0
+        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program,
+                     s.hotkey)
+        assert resp['page_id'] == 1
+        assert resp['resp_id'] == 'page_create'
+        assert resp['output_kwargs']['code'] == 0
+        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program,
+                     s.hotkey)
+        assert resp['page_id'] == 1
+        assert resp['resp_id'] == 'page_create'
+        assert resp['output_kwargs']['code'] == 0
 
         # kwargs = {'no_process': 'loose'}
         # dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
         # resp = s.run(req.no_process, s.core, s.profile, s.book, s.program, s.hotkey)
-
 
     # Not sure how/what i want to do, also what about a settings file???? argh
     def test_settings_inheritance(self):
@@ -403,18 +413,46 @@ class TestHotkeyPressed(MixIn):
 
         # just a dummy valie
         system = {}
+
+        # Test it creates and opens
         resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
                      system)
-        assert resp[0]['input_method'] == 'page_create'
-
-        assert resp[1]['output_method'] == 'page_load'
+        assert resp[0]['resp_id'] == 'page_create'
+        assert resp[0]['page_id'] == 1
+        assert resp[1]['resp_id'] == 'page_load'
+        assert resp[2]['resp_id'] == 'window_show'
 
         # just a dummy value
         system = {1: {'is_open': True}}
-        assert resp[1]['output_kwargs']['page_id'] == 1
-
         # Now test we can close it on the next key press
         resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
                      system)
-        assert resp[0]['output_method'] == 'page_close'
-        assert resp[1]['output_method'] == 'window_hide'
+        assert resp[0]['resp_id'] == 'page_close'
+        assert resp[1]['resp_id'] == 'window_hide'
+
+        #test reopen
+        system = {1: {'is_open': False}}
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, program, s.hotkey,
+                     system)
+        assert resp[0]['resp_id'] == 'page_load'
+        assert resp[0]['output_kwargs']['page_id'] == 1
+        assert resp[1]['resp_id'] == 'window_show'
+
+    def test_uncrumpled_active(s):
+        # If some page is open, and a page with program='uncrumpled' exists
+        # only send the page_load signal
+        dbapi.profile_create(s.core.db, s.profile)
+        kwargs = {'no_process': 'write'}
+
+        dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
+        resp = s.run(req.page_create, s.core, s.profile, s.book, s.program)
+        id_1 = resp['page_id']
+
+        system = {id_1: {'is_open': True}}
+        UNCRUMPLED = 'uncrumpled'
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, UNCRUMPLED, s.hotkey,
+                     system)
+        assert resp[0]['resp_id'] == 'page_create'
+        id_2 = resp[0]['page_id']
+        assert id_1 != id_2
+        assert resp[1]['resp_id'] == 'page_load'

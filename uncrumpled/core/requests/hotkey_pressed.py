@@ -107,9 +107,12 @@ def no_process(core, profile, book, program, hotkey):
         title = util.parse_title()
         specific = title
 
+    # import pdb;pdb.set_trace()
     for aresp in resp.noopify(req.page_create(core, profile, book, program,
                                specific, loose)):
-        rowid = aresp['page_id']
+        rowid = aresp.get('page_id')
+        if not rowid:
+            raise Exception('Should not get here')
         yield aresp
     return rowid
 
@@ -126,7 +129,8 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
     '''
     # TODO DELETE
     global DEVELOPING
-    DEVELOPING = app.DEVELOPING
+    if hasattr(app, 'DEVELOPING'):
+        DEVELOPING = app.DEVELOPING
 
     hotkey = json.dumps(hotkey)
     cond = "WHERE Hotkey == '{}' AND \
@@ -141,6 +145,7 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
             yield aresp
             page_id = yield from response
             yield resp.resp('page_load', page_id=page_id)
+            yield resp.resp('window_show')
         else:
             yield False
     else:
@@ -149,3 +154,4 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
             yield resp.resp('window_hide')
         else:
             yield resp.resp('page_load', page_id=page_id)
+            yield resp.resp('window_show')

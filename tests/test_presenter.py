@@ -66,7 +66,6 @@ class TestProfile(Mixin):
         assert 'profile does not exist' in response.lower()
 
 
-@pytest.mark.ab
 class TestUiInit(Mixin):
     def test_with_first_run_true(self):
         self.app.first_run = True
@@ -84,18 +83,17 @@ class TestUiInit(Mixin):
         response = self.run(req.ui_init, self.app)
         assert 'profile_set_active' in response
 
-
 class TestHotkeyPressed(Mixin):
     def test_page_load_and_page_close(s):
         dbapi.profile_create(s.app.db, s.profile)
         kwargs = {'no_process': 'write'}
         dbapi.book_create(s.app.db, s.profile, s.book, s.hotkey, **kwargs)
         resp =s.run(req.hotkey_pressed, s.app, s.profile, s.program, s.hotkey)
-        assert 'page_load' in resp
+        assert 'page_load' in resp[0]
         assert s.app.SYSTEM['pages'][1]['is_open'] == True
+        assert 'window_show' in resp[1]
 
         resp = s.run(req.hotkey_pressed, s.app, s.profile, s.program, s.hotkey)
         assert 'page_close' in resp[0]
         assert 'window_hide' in resp[1]
         assert s.app.SYSTEM['pages'][1]['is_open'] == False
-

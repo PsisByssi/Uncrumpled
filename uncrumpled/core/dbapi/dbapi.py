@@ -155,7 +155,7 @@ def page_create(db, profile, book, program, specific, loose):
 
 
 def page_update(db, profile, book, program, specific, loose):
-    rowid = util.page_rowid_get(db, profile, book, program, specific, loose)
+    rowid = page_rowid_get(db, profile, book, program, specific, loose)
     if rowid:
         to_update = _page_save(profile, book, program, specific, loose)
         cond = "WHERE Id == {}".format(rowid)
@@ -165,7 +165,7 @@ def page_update(db, profile, book, program, specific, loose):
 
 
 def page_delete(db, profile, book, program, specific, loose):
-    rowid = util.page_rowid_get(db, profile, book, program, specific, loose)
+    rowid = page_rowid_get(db, profile, book, program, specific, loose)
     if rowid:
         cond = "WHERE Id == {}".format(rowid)
         halt.delete(db, 'Pages', cond)
@@ -182,6 +182,20 @@ def page_get_all(db):
     results = halt.load_column(db, 'Pages', columns)
     for row in results:
         yield row
+
+
+def page_rowid_get(db, profile, book, program, specific, loose):
+    page = util.page_validate(profile, book, program, specific, loose)
+    cond = "WHERE Profile == '{}' AND \
+                  Book == '{}' AND \
+                  Program == '{}' AND \
+                  Specific == '{}' AND \
+                  Loose == '{}'".format(*page)
+    rowid = halt.load_column(db, 'Pages', ('Id',), cond=cond)
+    if not rowid:
+        return False
+    else:
+        return rowid[0][0]
 
 
 def profile_create(db, name):
