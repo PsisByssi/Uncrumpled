@@ -1,7 +1,20 @@
 '''
-    This module exposes hoyket_pressed
+    This module exposes hoykey_pressed
     It sends signals to load and close pages.
     It creates new pages if required,
+
+    REFACTOR IDEAS:
+        One idea would be to make the no_process options:
+            Read, Write, Shelve etc
+        be retrieved after getting the book, then dispatching the
+        page_find, and no_process calls to them.
+
+        should then be easier to follow what happens on a type of
+        keypress
+
+        the goal is to make it simple and concise for other people
+        to read and understand, (group conditionals that are related)
+
 '''
 import os
 import json
@@ -35,7 +48,7 @@ def page_itr(db, profile, book, program):
         yield x
 
 
-def page_find(db, profile, book, program):
+def page_find(db, profile, book, program, bookopts):
     '''
     if a specific page exists, returns that,
     otherwise a general page if one exists
@@ -44,6 +57,9 @@ def page_find(db, profile, book, program):
     global DEVELOPING
     if DEVELOPING and program in ('python3', 'python'):
         program = 'uncrumpled'
+
+    if bookopts['no_process'] == 'read':
+        return
 
     general = False
     for rowid, specific in page_itr(db, profile, book, program):
@@ -58,7 +74,7 @@ def page_find(db, profile, book, program):
             return general
 
 
-def no_process(core, profile, book, program, hotkey):
+def no_process(app, profile, book, program, hotkey, bookopts):
     '''
     What to do if a page doesn't exist.
     Very important part of uncrumpled. (very basic atm)
@@ -74,21 +90,16 @@ def no_process(core, profile, book, program, hotkey):
             Default Rule
             So far only the Profile Book checked, and then Book
     '''
-    cond = "WHERE Book == '{}' AND \
-                  Profile == '{}'".format(book, profile)
-    book_mash = json.loads(halt.load_column(core.db, 'Books',
-                                           ('MashConfig',), cond)[0][0])
-    no_process = book_mash['no_process']
+    no_process = bookopts['no_process']
 
     specific = None
     loose = None
 
+    # Default to creating a loose page
     if no_process == 'read': # load
-        raise NotImplementedError
+        return bookopts['loose']
     elif no_process == 'shelve': # do nothing
         return False
-    elif no_process == 'loose': # todo delete this.. read should do this, loose 
-        return book_mash['loose']
 
     # elif book_mash['no_process'] == 'prompt'
         # mmm how to do this now :)
@@ -108,11 +119,11 @@ def no_process(core, profile, book, program, hotkey):
         specific = title
 
     # import pdb;pdb.set_trace()
-    for aresp in resp.noopify(req.page_create(core, profile, book, program,
+    # Create a new page
+    for aresp in resp.noopify(req.page_create(app, profile, book, program,
                                specific, loose)):
         rowid = aresp.get('page_id')
-        if not rowid:
-            raise Exception('Should not get here')
+        assert rowid
         yield aresp
     return rowid
 
@@ -132,14 +143,25 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
     if hasattr(app, 'DEVELOPING'):
         DEVELOPING = app.DEVELOPING
 
+    # Find the book that is bound to the hotkey
     hotkey = json.dumps(hotkey)
     cond = "WHERE Hotkey == '{}' AND \
                   Profile == '{}'".format(hotkey, profile)
     book = halt.load_column(app.db, 'Hotkeys', ('Book',), cond)[0][0]
 
-    page_id = page_find(app.db, profile, book, program)
+    cond = "WHERE Book == '{}' AND \
+                  Profile == '{}'".format(book, profile)
+    bookopts = json.loads(halt.load_column(app.db, 'Books',
+                                           ('MashConfig',), cond)[0][0])
+
+    if bookopts['no_process'] == 'read':
+        page_id = bookopts.get('read_page')
+    else:
+        page_id = page_find(app.db, profile, book, program, bookopts)
+
+    # Potential create and load a new page
     if not page_id:
-        response = no_process(app, profile, book, program, hotkey)
+        response = no_process(app, profile, book, program, hotkey, bookopts)
         if response:
             aresp = next(response)
             yield aresp
@@ -148,10 +170,17 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
             yield resp.resp('window_show')
         else:
             yield False
+    # Open or close a page
     else:
         if system_pages[page_id]['is_open']:
             yield resp.resp('page_close', page_id=page_id)
             yield resp.resp('window_hide')
         else:
+            # NOTE, this is a simple work around to make uncrumpled
+            # be able to have notepages on it, This implementaiton limits
+            # alot of options (we are not using them atm so it is ok)
+            for page, value in system_pages.items():
+                if page != page_id:
+                    yield resp.resp('page_close', page_id=page)
             yield resp.resp('page_load', page_id=page_id)
             yield resp.resp('window_show')

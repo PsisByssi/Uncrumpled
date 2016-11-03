@@ -351,7 +351,8 @@ class TestPageFind(MixIn):
         dbapi.profile_create(self.core.db, self.profile)
         assert dbapi.page_create(self.core.db, self.profile, self.book, self.program, None, None)
         assert dbapi.page_create(self.core.db, self.profile, self.profile, self.program, 'some specifc', None)
-        resp = self.run(req.page_find, self.core.db, self.profile, self.book, self.program)
+        bookopts = {'no_process': 'write'}
+        resp = self.run(req.page_find, self.core.db, self.profile, self.book, self.program, bookopts)
         assert resp
         rowid = resp
         data = get_all_data(self.core.db, 'Pages')[0]
@@ -364,29 +365,29 @@ class TestNoProcess(MixIn):
     def test_basic(s):
         kwargs = {'no_process': 'shelve'}
         dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
-        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program, s.hotkey)
+        resp = s.run(req.no_process, s.core, s.profile, s.book, s.program, s.hotkey, kwargs)
         assert resp is False
 
     def test_general(s):
         kwargs = {'no_process': 'write'}
         dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
         resp = s.run(req.no_process, s.core, s.profile, s.book, s.program,
-                     s.hotkey)
+                     s.hotkey, kwargs)
         assert resp['page_id'] == 1
         assert resp['resp_id'] == 'page_create'
         assert resp['output_kwargs']['code'] == 1
         resp = s.run(req.no_process, s.core, s.profile, s.book, s.program,
-                     s.hotkey)
+                     s.hotkey, kwargs)
         assert resp['page_id'] == 1
         assert resp['resp_id'] == 'page_create'
         assert resp['output_kwargs']['code'] == 0
         resp = s.run(req.no_process, s.core, s.profile, s.book, s.program,
-                     s.hotkey)
+                     s.hotkey, kwargs)
         assert resp['page_id'] == 1
         assert resp['resp_id'] == 'page_create'
         assert resp['output_kwargs']['code'] == 0
         resp = s.run(req.no_process, s.core, s.profile, s.book, s.program,
-                     s.hotkey)
+                     s.hotkey, kwargs)
         assert resp['page_id'] == 1
         assert resp['resp_id'] == 'page_create'
         assert resp['output_kwargs']['code'] == 0
@@ -401,7 +402,6 @@ class TestNoProcess(MixIn):
 
     def test_settings_composition(self):
         pass
-
 
 class TestHotkeyPressed(MixIn):
     def test_general_page(s):

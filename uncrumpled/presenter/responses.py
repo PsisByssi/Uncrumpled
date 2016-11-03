@@ -112,13 +112,6 @@ class PageLoad(ResponseHandler):
             self.system['pages'][page_id]['is_open'] = True
         self.page_id = page_id
 
-        # TODO, DEL, this is a simple work around to make uncrumpled
-        # be able to have notepages on it, This implementaiton limits
-        # alot of options (we are not using them atm so it is ok)
-        for page, value in self.system['pages'].items():
-            if page != page_id:
-                value['is_open'] = False
-
     def partial_ui_update(self):
         method = self.response.get('output_method')
         file = self.system['pages'][self.page_id]['file']
