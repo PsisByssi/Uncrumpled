@@ -25,12 +25,17 @@ def rand_str(length):
     return ''.join(char for char in chars)
 
 
-def _rand_name_in_dir(dir):
-    '''returns a str not found in a dir'''
+def _rand_name_in_list(lst):
+    '''returns a str not found in a list'''
     fname = rand_str(8)
-    while fname in os.listdir(dir):
+    while fname in lst:
         fname = rand_str(8)
     return fname
+
+
+def _rand_name_in_dir(dir):
+    '''returns a str not found in a dir'''
+    return _rand_name_in_list(os.listdir(dir))
 
 
 def ufile_get(db, page_id):

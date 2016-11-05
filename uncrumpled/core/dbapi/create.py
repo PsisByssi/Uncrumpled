@@ -65,21 +65,22 @@ def new_db(database):
         cur.execute("INSERT INTO DefaultOptions ('Name') VALUES ('user')")
         con.commit()
         defaultOptions = {'Name': 'System Default'}
-        defaultOptions['no_process'] = 'new'
-        defaultOptions['empty_book'] = 'homepage'
-        defaultOptions['homepage'] = 1
-        defaultOptions['prompt_external_link'] = 0
-        defaultOptions['external_link'] = 0
-        defaultOptions['win_location'] = 'center'
-        defaultOptions['win_brain'] = 'session'
-        defaultOptions['win_open_method'] = 'slide'
-        defaultOptions['opacity'] = 0.85
-        defaultOptions['opacity_brain'] = 'session'
-        defaultOptions['startup_lock'] = 1
-        defaultOptions['lock_memory'] = 0
-        defaultOptions['edit_through_lock'] = 1
-        defaultOptions['send_hotkey'] = 1
-        defaultOptions['cursor_brain'] = 'session'
+        defaultOptions['no_process'] = 'write'
+        defaultOptions['no_read_file'] = 'create_with_random_name'
+        # defaultOptions['empty_book'] = 'homepage'
+        # defaultOptions['homepage'] = 1
+        # defaultOptions['prompt_external_link'] = 0
+        # defaultOptions['external_link'] = 0
+        # defaultOptions['win_location'] = 'center'
+        # defaultOptions['win_brain'] = 'session'
+        # defaultOptions['win_open_method'] = 'slide'
+        # defaultOptions['opacity'] = 0.85
+        # defaultOptions['opacity_brain'] = 'session'
+        # defaultOptions['startup_lock'] = 1
+        # defaultOptions['lock_memory'] = 0
+        # defaultOptions['edit_through_lock'] = 1
+        # defaultOptions['send_hotkey'] = 1
+        # defaultOptions['cursor_brain'] = 'session'
 
         halt.insert(database, 'DefaultOptions', defaultOptions, mash=True)
 

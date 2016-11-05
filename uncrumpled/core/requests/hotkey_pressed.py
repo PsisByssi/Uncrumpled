@@ -25,6 +25,7 @@ from uncrumpled.core import dbapi
 from uncrumpled.core import core_request
 from uncrumpled.core import responses as resp
 from uncrumpled.core import requests as req
+from uncrumpled.core import util
 
 DEVELOPING = False
 
@@ -79,26 +80,45 @@ def no_process(app, profile, book, program, hotkey, bookopts):
     What to do if a page doesn't exist.
     Very important part of uncrumpled. (very basic atm)
 
-    First check if the book is set to load a loose page TODO
-    then follow some sort of inheritance/composition rules...
-
-    From old uncrumpled: (not sure if i want to change this)
-        Order of importince of rules
-            Program, Book Profile
-            Program Rule, e.g if firefox always do this
-            Book Profile Rule
-            Default Rule
-            So far only the Profile Book checked, and then Book
+    returns False if nothing is to be done
     '''
+    # First check if the book is set to load a loose page TODO
+    # then follow some sort of inheritance/composition rules...
+
+    # From old uncrumpled: (not sure if i want to change this)
+        # Order of importince of rules
+            # Program, Book Profile
+            # Program Rule, e.g if firefox always do this
+            # Book Profile Rule
+            # Default Rule
+            # So far only the Profile Book checked, and then Book
     no_process = bookopts['no_process']
 
     specific = None
     loose = None
 
-    # Default to creating a loose page
-    if no_process == 'read': # load
-        return bookopts['loose']
-    elif no_process == 'shelve': # do nothing
+    # Load a page
+    if no_process == 'read':
+        # If we got this far, no page has been set for reading
+        assert not bookopts.get('read_page')
+        no_read_file = bookopts.get('no_read_file')
+
+        # create a loose page with a random name
+        if no_read_file == 'create_with_random_name':
+            loose = util._rand_name_in_list(dbapi.loose_get_all(app.db, profile))
+            for aresp in resp.noopify(req.page_create(app, profile, book, program,
+                                       specific, loose)):
+                rowid = aresp.get('page_id')
+                assert rowid
+                yield aresp
+            # Point the book to the page
+            dbapi.book_update(app.db, book, profile, read_page=rowid)
+            return rowid
+        else:
+            raise NotImplementedError
+
+    # Do nothing
+    elif no_process == 'shelve':
         return False
 
     # elif book_mash['no_process'] == 'prompt'
@@ -110,22 +130,20 @@ def no_process(app, profile, book, program, hotkey, bookopts):
             # edb.create_page(book,
                             # active_program,
                             # self.active_profile)
-    elif no_process == 'write': #new
-        pass
+    # Create New Page
+    elif no_process == 'write':
+        for aresp in resp.noopify(req.page_create(app, profile, book, program,
+                                   specific, loose)):
+            rowid = aresp.get('page_id')
+            assert rowid
+            yield aresp
+        return rowid
 
-    elif no_process == 'bookmark': #load specific
+    # Load specific
+    elif no_process == 'bookmark':
         raise NotImplementedError
         title = util.parse_title()
         specific = title
-
-    # import pdb;pdb.set_trace()
-    # Create a new page
-    for aresp in resp.noopify(req.page_create(app, profile, book, program,
-                               specific, loose)):
-        rowid = aresp.get('page_id')
-        assert rowid
-        yield aresp
-    return rowid
 
 
 @core_request()
@@ -159,12 +177,12 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
     else:
         page_id = page_find(app.db, profile, book, program, bookopts)
 
-    # Potential create and load a new page
+    # Potentially create and load a new page
     if not page_id:
         response = no_process(app, profile, book, program, hotkey, bookopts)
         if response:
-            aresp = next(response)
-            yield aresp
+            create_resp = next(response)
+            yield create_resp
             page_id = yield from response
             yield resp.resp('page_load', page_id=page_id)
             yield resp.resp('window_show')

@@ -82,6 +82,20 @@ def book_delete(db, book, profile):
     return True
 
 
+def book_update(db, book, profile, **to_update):
+    '''
+    Required a dict that will update columns or mash
+    return False if book doesn't exist
+    return True if update succesful
+    '''
+    if book not in book_get_all(db):
+        return False
+    cond = "where Book == '{0}' and Profile == '{1}'"\
+                    .format(book, profile)
+    halt.update(db, 'Books', to_update, cond, mash=True)
+    return True
+
+
 def book_get_all(db):
     results = halt.load_column(db, 'Books', ('Book',))
     return [x[0] for x in results]
@@ -127,6 +141,17 @@ def hotkey_get_all(db, profile):
     for hk in  halt.load_column(db, 'Hotkeys', ('Hotkey',), cond):
         hotkeys.append(halt.objectify(hk[0]))
     return hotkeys
+
+
+def loose_get_all(db, profile):
+    '''returns a list of all loose pages for a given profile'''
+    filenames = []
+    cond = "where Profile == '" + profile + "'"
+    for fname in  halt.load_column(db, 'Pages', ('Loose',), cond):
+        fname = fname[0]
+        if fname not in util.UNIQUE_NULL:
+            filenames.append(fname)
+    return filenames
 
 
 def _page_save(profile, book, program, specific, loose):

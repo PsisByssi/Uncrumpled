@@ -361,6 +361,7 @@ class TestPageFind(MixIn):
         assert data[3] == self.program
         assert data[4] == dbapi.UNIQUE_NULL
 
+# Subfunc of TestHotkeyPressed
 class TestNoProcess(MixIn):
     def test_basic(s):
         kwargs = {'no_process': 'shelve'}
@@ -392,9 +393,6 @@ class TestNoProcess(MixIn):
         assert resp['resp_id'] == 'page_create'
         assert resp['output_kwargs']['code'] == 0
 
-        # kwargs = {'no_process': 'loose'}
-        # dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
-        # resp = s.run(req.no_process, s.core, s.profile, s.book, s.program, s.hotkey)
 
     # Not sure how/what i want to do, also what about a settings file???? argh
     def test_settings_inheritance(self):
@@ -456,3 +454,23 @@ class TestHotkeyPressed(MixIn):
         id_2 = resp[0]['page_id']
         assert id_1 != id_2
         assert resp[1]['resp_id'] == 'page_load'
+
+    def test_read_create_with_random_name(s):
+        # First should create a new page
+        dbapi.profile_create(s.core.db, s.profile)
+        kwargs = {'no_process': 'read', 'no_read_file': 'create_with_random_name'}
+        dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
+
+        system = {}
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, s.program, s.hotkey,
+                     system)[0]
+        id_1 = resp['page_id']
+        assert resp['resp_id'] == 'page_create'
+        assert resp['output_kwargs']['code'] == 1
+
+        # Next calls should open the page (not create more)
+        system = {id_1: {'is_open': False}}
+        resp = s.run(req.hotkey_pressed, s.core, s.profile, s.program, s.hotkey,
+                     system)
+        assert id_1 == resp[0]['output_kwargs']['page_id']
+        assert resp[0]['resp_id'] == 'page_load'
