@@ -2,65 +2,17 @@
     Tests requests against the core
 '''
 
-import asyncio
-import tempfile
-import os
-import shutil
-from types import GeneratorType
-
 import pytest
 import halt
 import peasoup
 
 from uncrumpled.core import requests as req
-from uncrumpled.core import dbapi, Core
-from util import get_all_data
+from uncrumpled.core import dbapi
+from util import get_all_data, UNCRUMPLED, MixInTestHelper
 
 
-class MixIn():
-    profile = 'test profile'
-    book = 'test book'
-    program = 'testprogram'
-    hotkey = ['f5']
-    specific = None
-    loose = None
-    def setup_class(cls):
-        cls.tdir = tempfile.mkdtemp()
-        # cls.db = os.path.join(cls.tdir, 'test.db')
-        # dbapi.new_db(cls.db)
-        cls.core = Core(db='')
-        cls.event_loop = asyncio.get_event_loop()
 
-    def teardown_class(cls):
-        shutil.rmtree(cls.tdir)
-        cls.event_loop.close()
-
-    def setup_method(self, func):
-        '''create fresh database for each test method'''
-        self.core.db = os.path.join(self.tdir, func.__name__+'.db')
-        try:
-            os.remove(self.core.db)
-        except FileNotFoundError:
-            pass
-        dbapi.new_db(self.core.db)
-
-    def run(self, func, *args, **kwargs):
-        '''
-        some isolation if we change from generaotrs
-        '''
-        res = func(*args, **kwargs)
-        if type(res) != GeneratorType:
-            return res
-        else:
-            res = list(res)
-            if len(res) == 1:
-                return res[0]
-            if res == []:
-                return False
-            return res
-
-
-class TestProfile(MixIn):
+class TestProfile(MixInTestHelper):
     def test_profile_create(self):
         response = self.run(req.profile_create, self.core, 'new')
         assert 'profile created' in response['output_kwargs']['msg'].lower()
@@ -102,7 +54,7 @@ class TestProfile(MixIn):
         assert test_active[0][0]
 
 
-class TestBook(MixIn):
+class TestBook(MixInTestHelper):
     active_profile = 'default'
 
     def setup_method(self, func):
@@ -163,7 +115,7 @@ class TestBook(MixIn):
         assert response['output_kwargs']['code'] != 1
 
 
-class TestPage(MixIn):
+class TestPage(MixInTestHelper):
     page = 'testpage'
 
     def test_page_create(self):
@@ -223,7 +175,7 @@ class TestPage(MixIn):
         assert data[3] == self.program
 
 
-class TestHotkeys(MixIn):
+class TestHotkeys(MixInTestHelper):
 
     def test_hotkey_create(self):
         response = self.run(req.hotkey_create, self.core, self.profile, self.book,
@@ -295,7 +247,7 @@ class TestHotkeys(MixIn):
         assert response[1]['output_method'] == 'system_hotkey_register'
 
 
-class TestUiInit(MixIn):
+class TestUiInit(MixInTestHelper):
     def test_first_run(self):
         self.first_run = True
         response = self.run(req.ui_init, self.core, self.first_run)
@@ -334,7 +286,7 @@ class TestUiInit(MixIn):
 
 
 #TODO move to own file
-class TestPageFind(MixIn):
+class TestPageFind(MixInTestHelper):
     specific = 'banking.com/page'
     program = 'testprogram'
     '''
@@ -362,7 +314,7 @@ class TestPageFind(MixIn):
         assert data[4] == dbapi.UNIQUE_NULL
 
 # Subfunc of TestHotkeyPressed
-class TestNoProcess(MixIn):
+class TestNoProcess(MixInTestHelper):
     def test_basic(s):
         kwargs = {'no_process': 'shelve'}
         dbapi.book_create(s.core.db, s.profile, s.book, s.hotkey, **kwargs)
@@ -401,7 +353,7 @@ class TestNoProcess(MixIn):
     def test_settings_composition(self):
         pass
 
-class TestHotkeyPressed(MixIn):
+class TestHotkeyPressed(MixInTestHelper):
     def test_general_page(s):
         # Test a note gets created if need be
         dbapi.profile_create(s.core.db, s.profile)
@@ -447,13 +399,12 @@ class TestHotkeyPressed(MixIn):
         id_1 = resp['page_id']
 
         system = {id_1: {'is_open': True}}
-        UNCRUMPLED = 'uncrumpled'
         resp = s.run(req.hotkey_pressed, s.core, s.profile, UNCRUMPLED, s.hotkey,
                      system)
-        assert resp[0]['resp_id'] == 'page_create'
-        id_2 = resp[0]['page_id']
+        assert resp[1]['resp_id'] == 'page_create'
+        id_2 = resp[1]['page_id']
         assert id_1 != id_2
-        assert resp[1]['resp_id'] == 'page_load'
+        assert resp[2]['resp_id'] == 'page_load'
 
     def test_read_create_with_random_name(s):
         # First should create a new page

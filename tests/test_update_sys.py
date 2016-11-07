@@ -1,6 +1,7 @@
 '''
     Testing a response from the core gets added to the
     system dict correctly
+
 '''
 import os
 import copy
@@ -8,10 +9,11 @@ import copy
 import pytest
 
 from uncrumpled.presenter import responses as resp
+from uncrumpled.presenter import requests as req
 from uncrumpled.presenter.util import system_base
 from uncrumpled import core
 from uncrumpled.core import dbapi
-from util import EasyUncrumpled
+from util import get_all_data, UNCRUMPLED, MixInTestHelper, EasyUncrumpled
 
 
 class App(EasyUncrumpled):
@@ -22,10 +24,9 @@ class TestBind():
         cls.hotkey = 'h'
         cls.event_type = 'key_down'
         cls.command = 'test'
-        cls.response = {'event_type': cls.event_type,
+        cls.response = {'output_kwargs':{'event_type': cls.event_type,
                         'hotkey': cls.hotkey,
-                        'command': cls.command,
-                        }
+                        'command': cls.command,}}
 
     def setup_method(self, func):
         _ = copy.deepcopy(system_base)
@@ -123,6 +124,25 @@ class TestLoadPage():
         handler.add_to_system()
         assert s.page_id in s.system['pages']
         assert not s.system['pages'][s.page_id]['is_open']
+
+
+class TestHotkeyPressed(MixInTestHelper): #TODO simplify the testing helpers..
+    def setup_method(s, func):
+        super().setup_method(func)
+        s.app = App()
+
+    @pytest.mark.ab
+    def test_opened_are_closed_on_switch(s):
+        s.page_id = dbapi.page_create(s.app.db, s.profile, s.program, s.program,
+                                        s.specific, s.loose)
+        dbapi.profile_create(s.app.db, s.profile)
+        kwargs = {'no_process': 'write'}
+        dbapi.book_create(s.app.db, s.profile, s.book, s.hotkey, **kwargs)
+        file = core.util.ufile_create(s.app, s.page_id)
+
+        s.app.SYSTEM['pages'][s.page_id] = {'is_open': True, 'file': file}
+        req.hotkey_pressed(s.app, s.profile, s.program, s.hotkey)
+        assert s.app.SYSTEM['pages'][s.page_id]['is_open'] == False
 
 
 # class TestUiInit():

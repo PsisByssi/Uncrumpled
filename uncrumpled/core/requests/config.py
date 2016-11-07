@@ -76,6 +76,9 @@ def ui_init(core, first_run, user_or_token=None, password=None):
             yield aresp
         yield resp.resp('page_load', page_id=page_id)
 
+        # yield resp.resp('bind_add', resp_id='bind_add', hotkey='escape', event_type='on_touch_down',
+                                    # command='window_hide')
+
     # if data.get('new_user'):
         # yield config.new_user(data)
     # yield config.ui_config()

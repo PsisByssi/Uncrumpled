@@ -181,6 +181,10 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
     if not page_id:
         response = no_process(app, profile, book, program, hotkey, bookopts)
         if response:
+            # Close any other open pages
+            for to_close in system_pages:
+                if to_close != page_id:
+                    yield resp.resp('page_close', page_id=to_close)
             create_resp = next(response)
             yield create_resp
             page_id = yield from response
@@ -193,10 +197,11 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
         if system_pages[page_id]['is_open']:
             yield resp.resp('page_close', page_id=page_id)
             yield resp.resp('window_hide')
+        # NOTE, this is a simple work around to make uncrumpled
+        # be able to have notepages on it, This implementaiton limits
+        # alot of options (we are not using them atm so it is ok)
         else:
-            # NOTE, this is a simple work around to make uncrumpled
-            # be able to have notepages on it, This implementaiton limits
-            # alot of options (we are not using them atm so it is ok)
+            # Close any other open pages
             for page, value in system_pages.items():
                 if page != page_id:
                     yield resp.resp('page_close', page_id=page)

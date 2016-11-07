@@ -37,11 +37,13 @@ class ResponseHandler():
 class BindAdd(ResponseHandler):
     def add_to_system(self):
         # input format
-        # {'add_bind': {'hotkey': '', 'event_type': '', 'command'}}
+        # {'bind_add': {'hotkey': '', 'event_type': '', 'command':}}
         # after: sys = {binds: {event_type: {hk [cb1, cb2]}]}
-        event_type = self.response['event_type']
-        hk = self.response['hotkey']
-        command = self.response['command']
+        event_type = self.response['output_kwargs']['event_type']
+        hk = self.response['output_kwargs']['hotkey']
+        command = self.response['output_kwargs']['command']
+        args = self.response['output_kwargs'].get('args')
+        kwargs = self.response['output_kwargs'].get('kwargs')
 
         for cb in command:
             if cb not in self.system['functions']:
@@ -62,9 +64,9 @@ class BindAdd(ResponseHandler):
 
 class BindRemove(ResponseHandler):
     def add_to_system(self):
-        event_type = self.response['event_type']
-        hk = self.response['hotkey']
-        command = self.response['command']
+        event_type = self.response['output_kwargs']['event_type']
+        hk = self.response['output_kwargs']['hotkey']
+        command = self.response['output_kwargs']['command']
 
         for i, func in enumerate(self.system['binds'][event_type][hk]):
             if func == command:
@@ -128,6 +130,15 @@ class PageClose(ResponseHandler):
         method = self.response.get('output_method')
         file = self.system['pages'][self.page_id]['file']
         return "{}(file='{}')".format(method, file)
+
+# class HotkeyPressed(ResponseHandler):
+    # def add_to_system(self):
+        # page_id = 
+
+
+    # def partial_ui_update(self):
+        # pass
+
 
 class WindowShow(ResponseHandler): pass
 class WindowHide(ResponseHandler): pass

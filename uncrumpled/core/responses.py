@@ -65,12 +65,13 @@ _UI = ('window_show',
        'page_close',
        'system_hotkey_register',
        'system_hotkey_unregister',
+       'bind_add',
         )
 
 def resp(method, resp_id=None, **kwargs):
     '''
     :resp_id: a unique id for this response
-    this is for running arbitrary response handlers,
+    used for running arbitrary response handlers,
     the response is unable to call other requests'''
     assert method in _UI, 'Add method to_ui: ' +method
     if not resp_id:

@@ -74,6 +74,7 @@ class TestUiInit(Mixin):
         assert 'welcome_screen' in response[1]
         assert 'page_load' in response[2]
         assert self.app.SYSTEM['pages'][1]['is_open']
+        # assert 'bind_add' in response[3]
         assert 'profile_set_active' in response[3]
         assert 'system_hotkey_register' in response[4]
         assert 'system_hotkey_register' in response[5]
