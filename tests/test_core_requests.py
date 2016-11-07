@@ -11,7 +11,6 @@ from uncrumpled.core import dbapi
 from util import get_all_data, UNCRUMPLED, MixInTestHelper
 
 
-
 class TestProfile(MixInTestHelper):
     def test_profile_create(self):
         response = self.run(req.profile_create, self.core, 'new')

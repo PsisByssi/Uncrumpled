@@ -29,6 +29,15 @@ from uncrumpled.core import util
 
 DEVELOPING = False
 
+
+def close_open_pages(system_pages, ignore):
+    for to_close, value in system_pages.items():
+        if to_close != ignore:
+            # TODO the fact that only open pages are closed is not tested (was causing bugs..)
+            if value['is_open']:
+                yield resp.resp('page_close', page_id=to_close)
+
+
 def page_specific_match(current, page):
     pass
 
@@ -181,10 +190,7 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
     if not page_id:
         response = no_process(app, profile, book, program, hotkey, bookopts)
         if response:
-            # Close any other open pages
-            for to_close in system_pages:
-                if to_close != page_id:
-                    yield resp.resp('page_close', page_id=to_close)
+            yield from close_open_pages(system_pages, ignore=page_id)
             create_resp = next(response)
             yield create_resp
             page_id = yield from response
@@ -201,9 +207,6 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
         # be able to have notepages on it, This implementaiton limits
         # alot of options (we are not using them atm so it is ok)
         else:
-            # Close any other open pages
-            for page, value in system_pages.items():
-                if page != page_id:
-                    yield resp.resp('page_close', page_id=page)
+            yield from close_open_pages(system_pages, ignore=page_id)
             yield resp.resp('page_load', page_id=page_id)
             yield resp.resp('window_show')
