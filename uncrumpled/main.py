@@ -6,6 +6,7 @@ import os
 from os.path import join
 import sys
 import logging
+import shutil
 import copy
 from contextlib import suppress
 
@@ -39,6 +40,8 @@ class Uncrumpled(MyAppBuilder):
 
         self.setup_config(self.data_dir)
 
+        self.dev_stuff()
+
         if not os.path.isfile(self.db):
             logging.info('A new database is being Created')
             create.new_db(self.db)
@@ -47,11 +50,12 @@ class Uncrumpled(MyAppBuilder):
             logging.info('Database file detected!: %s' % self.db)
 
         self.core = core.Core(self.db)
+        self.core.DEVELOPING = self.DEVELOPING
         os.chdir(os.path.dirname(kivygui.__file__))
         self.gui = kivygui.KivyGui()
         self.gui.start(self)
 
-    def setup_data_dir(self): #TODO delete, just for testing
+    def setup_data_dir(self):
         if not DEVELOPING:
             return self.get_appdir(portable_path=os.path.dirname(__file__))
         else:
@@ -67,6 +71,15 @@ class Uncrumpled(MyAppBuilder):
         cfg_file = join(self.data_dir, self.pcfg['config_file'])
         self.create_cfg(cfg_file)
         logging.info('First time run?: ' + str( self.first_run))
+
+    def dev_stuff(self):
+        if DEVELOPING:
+            # move some files in that are required..
+            path = os.path.abspath('deploy')
+            required = ('default.keymap',)
+            for file in required:
+                shutil.copyfile(os.path.join(path, file),
+                                os.path.join(self.data_dir, file))
 
 
 if __name__ == '__main__':

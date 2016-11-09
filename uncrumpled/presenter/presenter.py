@@ -9,6 +9,8 @@
     system is a dict containg all the configuration options used
     by the gui.
 
+
+
     If we use rpc for the api parts of this will remain here
     specifically the bits related with updating the system
     The gui will need it's own presenter to communicate with us though.
@@ -28,7 +30,7 @@ def uncrumpled_request(func):
     all api exposed functions are wrapped here
 
     :return:
-        a list of strings to be evaled
+        a list of strings(functions) that the frontend should run
     '''
     # @asyncio.coroutine #ASYNC
     def wrapper(app, *args, **kwargs):
@@ -39,7 +41,7 @@ def uncrumpled_request(func):
             resp_handler = update_system(app, resp)
             if not resp_handler:
                 raise Exception('Create handler for ' + resp)
-            _res =resp_handler.partial_ui_update()
+            _res = resp_handler.partial_ui_update()
             if _res:
                 result.append(_res)
         return result

@@ -1,9 +1,11 @@
-Pillow
+pyyaml
+yamlordereddictloader
 psutil
-ipython
-pyreadline
-pysftp
 raven
-pyautogui
 pytest
 halt
+pysftp
+ipython
+pyreadline
+pyautogui
+

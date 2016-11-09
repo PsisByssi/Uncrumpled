@@ -4,8 +4,8 @@ from uncrumpled.core import responses as resp
 
 
 @core_request(is_resp_id=True)
-def profile_create(core, profile):
-    if dbapi.profile_create(core.db, profile):
+def profile_create(app, profile):
+    if dbapi.profile_create(app.db, profile):
         yield resp.status(key='profile_created',
                            code=1,
                            template={'profile': profile})
@@ -16,8 +16,8 @@ def profile_create(core, profile):
 
 
 @core_request(is_resp_id=True)
-def profile_delete(core, profile):
-    if dbapi.profile_delete(core.db, profile):
+def profile_delete(app, profile):
+    if dbapi.profile_delete(app.db, profile):
         yield resp.status(key='profile_deleted',
                            code=1,
                            template={'profile': profile})
@@ -28,14 +28,14 @@ def profile_delete(core, profile):
 
 
 @core_request(is_resp_id=True)
-def profile_get_active(core):
-    dbapi.profile_get_active(core.db)
+def profile_get_active(app):
+    dbapi.profile_get_active(app.db)
     yield resp.noop(key='profile_gotten')
 
 
 @core_request(is_resp_id=True)
-def profile_set_active(core, profile):
-    dbapi.profile_set_active(core.db, profile)
+def profile_set_active(app, profile):
+    dbapi.profile_set_active(app.db, profile)
     yield resp.status(key='profile_changed',
                        code=1,
                        template={'profile': profile})

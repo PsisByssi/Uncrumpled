@@ -2,7 +2,6 @@
 '''
     All the functions the UI uses to interact with the core.
 '''
-# TODO passing in core class should be removed
 
 from uncrumpled.presenter.presenter import uncrumpled_request
 from uncrumpled.core import requests as req

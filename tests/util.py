@@ -39,6 +39,27 @@ class MixIn():
                 return False
             return res
 
+# A testable uncrumpled main app
+class EasyUncrumpled(peasoup.AppBuilder):
+    def __init__(self):
+        pardir = os.path.abspath(join(os.path.dirname(__file__), os.path.pardir))
+        os.chdir(pardir)
+        super().__init__(main_file=join(pardir, 'uncrumpled', 'main.py'))
+        self.setup_dirs()
+        self.core = Core(db=self.db)
+        self.DEVELOPING = True
+        self.core.DEVELOPING = True
+        self.SYSTEM = copy.deepcopy(system_base)
+
+    def setup_dirs(self):
+        # This is copied from main.py, importing direcly was
+        # being wierd, kivy kept opening windows and messing with pytest
+        self.data_dir = tempfile.mkdtemp()
+        self.db = join(self.data_dir, 'test.db')
+        create.new_db(self.db)
+        self.notedir = join(self.data_dir, 'notes')
+        os.makedirs(self.notedir, exist_ok=True)
+
 
 class MixInTestHelper(MixIn):
     '''
@@ -51,45 +72,21 @@ class MixInTestHelper(MixIn):
     specific = None
     loose = None
     def setup_class(cls):
-        cls.tdir = tempfile.mkdtemp()
-        # cls.db = os.path.join(cls.tdir, 'test.db')
-        # dbapi.new_db(cls.db)
-        cls.core = Core(db='')
+        cls.app = EasyUncrumpled()
         cls.event_loop = asyncio.get_event_loop()
 
     def teardown_class(cls):
-        shutil.rmtree(cls.tdir)
+        shutil.rmtree(cls.app.data_dir)
         cls.event_loop.close()
 
     def setup_method(self, func):
         '''create fresh database for each test method'''
-        self.core.db = os.path.join(self.tdir, func.__name__+'.db')
+        self.app.db = os.path.join(self.app.data_dir, func.__name__+'.db')
+        self.app.core.db = self.app.db
         try:
-            os.remove(self.core.db)
+            os.remove(self.app.db)
         except FileNotFoundError:
             pass
-        dbapi.new_db(self.core.db)
+        dbapi.new_db(self.app.db)
 
 
-# A testable uncrumpled main app
-class EasyUncrumpled(peasoup.AppBuilder, MixIn):
-    def __init__(self):
-        self.data_dir = self.setup_data_dir()
-        pardir = os.path.abspath(join(os.path.dirname(__file__), os.path.pardir))
-        os.chdir(pardir)
-        super().__init__(main_file=join(pardir, 'uncrumpled', 'main.py'))
-        self.setup_dirs()
-        self.SYSTEM = copy.deepcopy(system_base)
-
-    def setup_dirs(self):
-        # This is copied from main.py, importing direcly was
-        # being wierd, kivy kept opening windows and messing with pytest
-        self.data_dir = self.setup_data_dir()
-        self.db = join(self.data_dir, 'test.db')
-        create.new_db(self.db)
-        self.notedir = join(self.data_dir, 'notes')
-        os.makedirs(self.notedir, exist_ok=True)
-
-    def setup_data_dir(self):
-        self.tdir = tempfile.mkdtemp()
-        return self.tdir

@@ -11,6 +11,7 @@ import copy
 
 from uncrumpled.core import Core
 from uncrumpled.core import dbapi
+from uncrumpled.core.requests.config import KEYMAP_FILES
 from uncrumpled.presenter import requests as req
 from uncrumpled.presenter.util import system_base
 
@@ -67,6 +68,14 @@ class TestProfile(Mixin):
 
 
 class TestUiInit(Mixin):
+    def setup_class(cls):
+        super().setup_class(cls)
+        # move some files in that are required..
+        path = os.path.abspath('deploy')
+        for file in KEYMAP_FILES:
+            shutil.copyfile(os.path.join(path, file),
+                            os.path.join(cls.app.data_dir, file))
+
     def test_with_first_run_true(self):
         self.app.first_run = True
         response = self.run(req.ui_init, self.app)
@@ -82,7 +91,7 @@ class TestUiInit(Mixin):
     def test_with_first_run_false(self):
         self.app.first_run = False
         response = self.run(req.ui_init, self.app)
-        assert 'profile_set_active' in response
+        assert 'profile_set_active' in response[0]
 
 class TestHotkeyPressed(Mixin):
     def test_page_load_and_page_close(s):

@@ -19,6 +19,7 @@ from util import get_all_data, UNCRUMPLED, MixInTestHelper, EasyUncrumpled
 class App(EasyUncrumpled):
     pass
 
+@pytest.mark.f
 class TestBind():
     def setup_class(cls):
         cls.hotkey = 'h'
@@ -131,7 +132,6 @@ class TestHotkeyPressed(MixInTestHelper): #TODO simplify the testing helpers..
         super().setup_method(func)
         s.app = App()
 
-    @pytest.mark.ab
     def test_opened_are_closed_on_switch(s):
         s.page_id = dbapi.page_create(s.app.db, s.profile, s.program, s.program,
                                         s.specific, s.loose)

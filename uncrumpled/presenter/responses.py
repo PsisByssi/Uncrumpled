@@ -7,8 +7,8 @@
 from os.path import join
 from collections import defaultdict
 
-from uncrumpled.presenter.util import UI_API
 from uncrumpled import core
+from uncrumpled.core.responses import _UI
 from uncrumpled.presenter import util
 
 class ResponseHandler():
@@ -36,27 +36,42 @@ class ResponseHandler():
 
 class BindAdd(ResponseHandler):
     def add_to_system(self):
-        # input format
-        # {'bind_add': {'hotkey': '', 'event_type': '', 'command':}}
-        # after: sys = {binds: {event_type: {hk [cb1, cb2]}]}
+        '''
+        input: {'bind_add': {'hotkey': '', 'event_type': '', 'command':}}
+        after sys looks like: {binds: {event_type: {hk [cb1, cb2]}]}
+        '''
         event_type = self.response['output_kwargs']['event_type']
         hk = self.response['output_kwargs']['hotkey']
         command = self.response['output_kwargs']['command']
         args = self.response['output_kwargs'].get('args')
         kwargs = self.response['output_kwargs'].get('kwargs')
 
+        if not event_type:
+            # TODO another abstraction point for handling default args etc
+            self.response['output_kwargs']['event_type'] = 'on_touch_down'
+            event_type = 'on_touch_down'
+
+        if type(command) == str:
+            command = [command]
+        # TODO validation probably needs to happen more in the plugin system
         for cb in command:
+            # if cb not in _UI:
+            # TODO we need to reinstate this, because we want the application
+            # to just be a value, everything updateable etc
             if cb not in self.system['functions']:
-                raise Exception('Bad Callback in add_bind: ', cb)
+                raise Exception('Callback function does not exist: ' + cb)
 
         # Setup a function to handle a certain type of event.
         # All events of that type get filtered through this function.
         if not event_type in self.system['bind_handlers']:
-            if event_type in self.system['ui_event_types']:
+            if event_type in util.UI_EVENT_TYPES:
+            # TODO we need to reinstate this, because we want the application
+            # to just be a value, everything updateable etc
+            # if event_type in self.system['ui_event_types']:
                 self.system['bind_handlers'] = event_type
                 self.system['binds'][event_type] = defaultdict(list)
             else:
-                raise Exception('invalid event type')
+                raise Exception('invalid event type ' + event_type)
 
         commands = self.system['binds'][event_type][hk]
         commands.append(command)
