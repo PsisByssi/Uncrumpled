@@ -6,9 +6,9 @@
 
 from os.path import join
 from collections import defaultdict
+import json
 
 from uncrumpled import core
-from uncrumpled.core.responses import _UI
 from uncrumpled.presenter import util
 
 class ResponseHandler():
@@ -43,31 +43,26 @@ class BindAdd(ResponseHandler):
         event_type = self.response['output_kwargs']['event_type']
         hk = self.response['output_kwargs']['hotkey']
         command = self.response['output_kwargs']['command']
-        args = self.response['output_kwargs'].get('args')
-        kwargs = self.response['output_kwargs'].get('kwargs')
+        # args = self.response['output_kwargs'].get('args')
+        # kwargs = self.response['output_kwargs'].get('kwargs')
 
         if not event_type:
             # TODO another abstraction point for handling default args etc
-            self.response['output_kwargs']['event_type'] = 'on_touch_down'
-            event_type = 'on_touch_down'
+            self.response['output_kwargs']['event_type'] = 'on_key_down'
+            event_type = 'on_key_down'
 
-        if type(command) == str:
-            command = [command]
+        assert type(hk) == list
+        hk = json.dumps(hk)
+        self.response['output_kwargs']['hotkey'] = hk
+
         # TODO validation probably needs to happen more in the plugin system
-        for cb in command:
-            # if cb not in _UI:
-            # TODO we need to reinstate this, because we want the application
-            # to just be a value, everything updateable etc
-            if cb not in self.system['functions']:
-                raise Exception('Callback function does not exist: ' + cb)
+        if command not in self.system['functions']:
+            raise Exception('Callback function does not exist: ' + command)
 
         # Setup a function to handle a certain type of event.
         # All events of that type get filtered through this function.
         if not event_type in self.system['bind_handlers']:
-            if event_type in util.UI_EVENT_TYPES:
-            # TODO we need to reinstate this, because we want the application
-            # to just be a value, everything updateable etc
-            # if event_type in self.system['ui_event_types']:
+            if event_type in self.system['ui_event_types']:
                 self.system['bind_handlers'] = event_type
                 self.system['binds'][event_type] = defaultdict(list)
             else:
@@ -145,14 +140,6 @@ class PageClose(ResponseHandler):
         method = self.response.get('output_method')
         file = self.system['pages'][self.page_id]['file']
         return "{}(file='{}')".format(method, file)
-
-# class HotkeyPressed(ResponseHandler):
-    # def add_to_system(self):
-        # page_id = 
-
-
-    # def partial_ui_update(self):
-        # pass
 
 
 class WindowShow(ResponseHandler): pass

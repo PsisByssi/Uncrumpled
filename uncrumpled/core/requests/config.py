@@ -5,6 +5,7 @@ import yaml
 from yamlordereddictloader import Loader as OrderedLoader
 
 from uncrumpled.core import dbapi
+from uncrumpled.core import plugin
 from uncrumpled.core.core import core_request
 from uncrumpled.core import responses as resp
 from uncrumpled.core import requests as req
@@ -69,7 +70,8 @@ def get_kwargs(value):
     except AttributeError:
         # Integer hotkey with no arguments
         if type(value) == int:
-            return value, {}
+            hotkey = value
+            return [hotkey], {}
         raise
     else:
         # String based hotkey with potential kwargs
@@ -79,6 +81,8 @@ def get_kwargs(value):
             kwargs = {k : v for k, v in pairs}
         else:
             kwargs = {}
+        if type(hotkey) == str:
+            hotkey = [hotkey]
         return hotkey, kwargs
 
 '''
@@ -105,7 +109,35 @@ def parse_keymap(app):
             hk, kwargs = get_kwargs(keybind)
             yield resp.resp('bind_add', resp_id='bind_add',
                             hotkey=hk, event_type=kwargs.get('event_type'),
-                            command=action, kwargs=kwargs)
+                            command=action, command_kwargs=kwargs)
+
+
+def first_run_init(app):
+    yield resp.resp('window_show')
+    yield resp.resp('welcome_screen')
+
+    for aresp in resp.noopify(req.book_create(app, profile='default',
+                         book='learning', hotkey=['f2'],
+                         active_profile='default', no_process='write')):
+
+        yield aresp
+
+    for aresp in resp.noopify(req.page_create(app, profile='default',
+                          book='learning', program='uncrumpled',
+                          init_text=init_text)):
+        page_id = aresp['page_id']
+        yield aresp
+
+    for aresp in resp.noopify(req.book_create(app, profile='default',
+                          book='scratchpad', hotkey=['f3'],
+                          active_profile='default', no_process='read')):
+        yield aresp
+    yield resp.resp('page_load', page_id=page_id)
+
+
+def sys_init(system):
+    system['functions'] = plugin.get_functions()
+    system['ui_event_types'] = plugin.get_event_types()
 
 
 @core_request()
@@ -113,36 +145,25 @@ def ui_init(app, first_run, user_or_token=None, password=None):
     '''
     Code for startup
     '''
+    # Setup default books etc
     if first_run:
-        yield resp.resp('window_show')
-        yield resp.resp('welcome_screen')
-
-        for aresp in resp.noopify(req.book_create(app, profile='default',
-                             book='learning', hotkey=['f2'],
-                             active_profile='default', no_process='write')):
-
-            yield aresp
-
-        for aresp in resp.noopify(req.page_create(app, profile='default',
-                              book='learning', program='uncrumpled',
-                              init_text=init_text)):
-            page_id = aresp['page_id']
-            yield aresp
-
-        for aresp in resp.noopify(req.book_create(app, profile='default',
-                              book='scratchpad', hotkey=['f3'],
-                              active_profile='default', no_process='read')):
-            yield aresp
-        yield resp.resp('page_load', page_id=page_id)
+        yield from first_run_init(app)
 
     # if data.get('new_user'):
         # yield config.new_user(data)
     # yield config.ui_config()
+
+    # Setup the system
+    sys_init(app.SYSTEM)
+
+    # Set active profile
     profile = dbapi.profile_get_active(app.db)
     yield resp.resp('profile_set_active', profile=profile)
 
+    # Load hotkeys
     for aresp in req.hotkeys_load(app, profile):
         yield aresp
 
+    # Load keymap
     for aresp in parse_keymap(app):
         yield aresp

@@ -93,6 +93,7 @@ class TestUiInit(Mixin):
         response = self.run(req.ui_init, self.app)
         assert 'profile_set_active' in response[0]
 
+
 class TestHotkeyPressed(Mixin):
     def test_page_load_and_page_close(s):
         dbapi.profile_create(s.app.db, s.profile)

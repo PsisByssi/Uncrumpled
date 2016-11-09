@@ -5,6 +5,7 @@
 '''
 import os
 import copy
+import json
 
 import pytest
 
@@ -13,101 +14,72 @@ from uncrumpled.presenter import requests as req
 from uncrumpled.presenter.util import system_base
 from uncrumpled import core
 from uncrumpled.core import dbapi
-from util import get_all_data, UNCRUMPLED, MixInTestHelper, EasyUncrumpled
-
-
-class App(EasyUncrumpled):
-    pass
+from util import get_all_data, UNCRUMPLED, MixInTestHelper
 
 @pytest.mark.f
-class TestBind():
-    def setup_class(cls):
-        cls.hotkey = 'h'
-        cls.event_type = 'key_down'
-        cls.command = 'test'
-        cls.response = {'output_kwargs':{'event_type': cls.event_type,
-                        'hotkey': cls.hotkey,
-                        'command': cls.command,}}
+class TestBind(MixInTestHelper):
+    # def setup_method(self, func):
 
-    def setup_method(self, func):
+    def test_bind_add_and_remove(s):
+        s.command = 'test'
+        s.event_type = 'on_key_down'
+        s.response = {'output_kwargs':{'event_type': 'on_key_down',
+                      'hotkey': s.hotkey,
+                      'command': s.command,},
+                      'input_method': 'bind_add'}
+        # s.system['functions'] = ['test']
+        # s.system['ui_event_types'] = [s.event_type]
         _ = copy.deepcopy(system_base)
-        self.system = dict(_, **{'functions': 'test', 'ui_event_types': 'key_down'})
-
-    def test_bind_add_and_remove(self):
-        self.response['input_method'] = 'bind_add'
-        bind = resp.BindAdd(self.system, self.response)
+        s.system = dict(_, **{'functions': 'test', 'ui_event_types': [s.event_type]})
+        # s.response['input_method'] = 'bind_add'
+        bind = resp.BindAdd(s.system, s.response)
         bind.add_to_system()
-        commands = self.system['binds'][self.event_type][self.hotkey]
-        assert self.command in commands
-        bind_handlers = self.system['bind_handlers']
-        assert self.event_type in bind_handlers
+        commands = s.system['binds'][s.event_type][json.dumps(s.hotkey)]
+        assert s.command in commands
+        bind_handlers = s.system['bind_handlers']
+        assert s.event_type in bind_handlers
 
         assert not bind.partial_ui_update()
 
         # Test remove
-        self.response['input_method'] = 'bind_remove'
-        bind = resp.BindRemove(self.system, self.response)
+        s.response['input_method'] = 'bind_remove'
+        bind = resp.BindRemove(s.system, s.response)
         bind.add_to_system()
-        commands = self.system['binds'][self.event_type][self.hotkey]
-        assert self.command not in commands
+        commands = s.system['binds'][s.event_type][json.dumps(s.hotkey)]
+        assert s.command not in commands
 
         assert not bind.partial_ui_update()
 
 
-class TestProfile():
-    def setup_class(cls):
-        cls.profile = 'test profile'
-        cls.response = {'profile': cls.profile,
-                        'input_kwargs': {'profile':cls.profile},
-                        'output_kwargs': {}}
-
-    def setup_method(self, func):
-        self.system = copy.deepcopy(system_base)
-
-    def test_profile_create(self):
-        self.response['input_method'] = 'profile_create'
-        self.response['output_method'] = 'status_update'
-        profile = resp.ProfileCreate(self.system, self.response)
+class TestProfile(MixInTestHelper):
+    def test_profile_create(s):
+        s.response = {'profile': s.profile,
+                        'input_kwargs': {'profile': s.profile},
+                        'output_kwargs': {},
+                        'input_method': 'profile_create',
+                        'output_method': 'status_update'}
+        profile = resp.ProfileCreate(s.system, s.response)
         profile.add_to_system()
-        assert self.response['profile'] in self.system['profiles']
+        assert s.response['profile'] in s.system['profiles']
         assert profile.partial_ui_update()
 
 
-class TestPage():
-    def setup_class(cls):
-        cls.page_id = 1
-        cls.response = {'page_id': cls.page_id}
-        cls.app = App()
-
-    def setup_method(self, func):
-        self.system = copy.deepcopy(system_base)
-
-    def test_create(self):
-        handler = resp.PageCreate(self.system, self.response, self.app)
+class TestPage(MixInTestHelper):
+    def test_create(s):
+        s.page_id = 1
+        s.response = {'page_id': s.page_id}
+        handler = resp.PageCreate(s.system, s.response, s.app)
         handler.add_to_system()
-        assert self.page_id in self.system['pages']
-        assert not self.system['pages'][self.page_id]['is_open']
-        assert self.system['pages'][self.page_id]['file']
+        assert s.page_id in s.system['pages']
+        assert not s.system['pages'][s.page_id]['is_open']
+        assert s.system['pages'][s.page_id]['file']
 
 
-class TestLoadPage():
-    profile = 'test profile'
-    book = 'test book'
-    program = 'testprogram'
-    hotkey = ['f5']
-    specific = None
-    loose = None
-    def setup_class(cls):
-        cls.page_id = 1
-        cls.response = {'output_kwargs': {'page_id': cls.page_id}}
-        cls.app = App()
-
-    def setup_method(self, func):
-        self.system = copy.deepcopy(system_base)
-
+class TestLoadPage(MixInTestHelper):
     def test_load_page_and_close_page(s):
         s.page_id = dbapi.page_create(s.app.db, s.profile, s.program, s.program,
                                         s.specific, s.loose)
+        s.response = {'output_kwargs': {'page_id': s.page_id}}
 
         # file has to be previosly created, the setup is done as in pagecreate
         file = core.util.ufile_create(s.app, s.page_id)
@@ -128,10 +100,6 @@ class TestLoadPage():
 
 
 class TestHotkeyPressed(MixInTestHelper): #TODO simplify the testing helpers..
-    def setup_method(s, func):
-        super().setup_method(func)
-        s.app = App()
-
     def test_opened_are_closed_on_switch(s):
         s.page_id = dbapi.page_create(s.app.db, s.profile, s.program, s.program,
                                         s.specific, s.loose)
@@ -143,23 +111,3 @@ class TestHotkeyPressed(MixInTestHelper): #TODO simplify the testing helpers..
         s.app.SYSTEM['pages'][s.page_id] = {'is_open': True, 'file': file}
         req.hotkey_pressed(s.app, s.profile, s.program, s.hotkey)
         assert s.app.SYSTEM['pages'][s.page_id]['is_open'] == False
-
-
-# class TestUiInit():
-    # profile = 'test profile'
-    # book = 'test book'
-    # program = 'testprogram'
-    # hotkey = ['f5']
-    # specific = None
-    # loose = None
-    # def setup_class(cls):
-        # cls.page_id = 1
-        # cls.response = {'output_kwargs': {'page_id': cls.page_id}}
-        # cls.app = App()
-
-    # def setup_method(self, func):
-        # self.system = copy.deepcopy(system_base)
-
-    # def test_first_run(s):
-        # handler = resp.Ui(s.system, s.response, s.app)
-        # import pdb;pdb.set_trace()

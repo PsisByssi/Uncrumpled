@@ -23,22 +23,6 @@ def get_all_data(db, table):
         return cur.fetchall()
 
 
-class MixIn():
-    def run(self, func, *args, **kwargs):
-        '''
-        some isolation if we change from generaotrs
-        '''
-        res = func(*args, **kwargs)
-        if type(res) != GeneratorType:
-            return res
-        else:
-            res = list(res)
-            if len(res) == 1:
-                return res[0]
-            if res == []:
-                return False
-            return res
-
 # A testable uncrumpled main app
 class EasyUncrumpled(peasoup.AppBuilder):
     def __init__(self):
@@ -49,7 +33,6 @@ class EasyUncrumpled(peasoup.AppBuilder):
         self.core = Core(db=self.db)
         self.DEVELOPING = True
         self.core.DEVELOPING = True
-        self.SYSTEM = copy.deepcopy(system_base)
 
     def setup_dirs(self):
         # This is copied from main.py, importing direcly was
@@ -61,9 +44,10 @@ class EasyUncrumpled(peasoup.AppBuilder):
         os.makedirs(self.notedir, exist_ok=True)
 
 
-class MixInTestHelper(MixIn):
+class MixInTestHelper():
     '''
-    Test helper when the mocked app is not required
+    Test helper
+    New db and system every method
     '''
     profile = 'test profile'
     book = 'test book'
@@ -71,6 +55,7 @@ class MixInTestHelper(MixIn):
     hotkey = ['f5']
     specific = None
     loose = None
+
     def setup_class(cls):
         cls.app = EasyUncrumpled()
         cls.event_loop = asyncio.get_event_loop()
@@ -80,7 +65,9 @@ class MixInTestHelper(MixIn):
         cls.event_loop.close()
 
     def setup_method(self, func):
-        '''create fresh database for each test method'''
+        '''create fresh database and system for each test method'''
+        self.system = copy.deepcopy(system_base)
+        self.app.SYSTEM = self.system
         self.app.db = os.path.join(self.app.data_dir, func.__name__+'.db')
         self.app.core.db = self.app.db
         try:
@@ -89,4 +76,16 @@ class MixInTestHelper(MixIn):
             pass
         dbapi.new_db(self.app.db)
 
+    def run(self, func, *args, **kwargs):
+        ''' some abstraction if we change from generaotrs or async etc'''
+        res = func(*args, **kwargs)
+        if type(res) != GeneratorType:
+            return res
+        else:
+            res = list(res)
+            if len(res) == 1:
+                return res[0]
+            if res == []:
+                return False
+            return res
 

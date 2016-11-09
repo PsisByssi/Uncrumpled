@@ -23,7 +23,7 @@ UI_API = ('status_update',
           'profile_set_active')
 
 # Event types the ui can handle #TODO Generate
-UI_EVENT_TYPES = ('on_touch_down', )
+UI_EVENT_TYPES = ('on_key_down', )
 
 
 def make_class_name(string):

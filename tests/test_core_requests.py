@@ -250,6 +250,7 @@ class TestHotkeys(MixInTestHelper):
         assert response[1]['output_method'] == 'system_hotkey_register'
 
 
+@pytest.mark.a
 class TestUiInit(MixInTestHelper):
     def setup_class(cls):
         super().setup_class(cls)
@@ -261,14 +262,13 @@ class TestUiInit(MixInTestHelper):
 
     def test_first_run(s):
         s.first_run = True
-        response = s.run(req.ui_init, s.app, s.first_run)
+        response = s.run(req.first_run_init, s.app)
         assert 'window_show' == response[0]['output_method']
         assert 'welcome_screen' == response[1]['output_method']
         assert 'book_create' == response[2]['input_method']
         assert 'page_create' == response[3]['input_method']
         assert 'book_create' == response[4]['input_method']
         assert 'page_load' == response[5]['output_method']
-        assert 'profile_set_active' == response[6]['output_method']
 
     def test_first_run_with_profile_active(s):
         s.first_run = True
@@ -450,8 +450,8 @@ class TestConfigReading(MixInTestHelper):
             with open(os.path.join(s.app.data_dir, file), 'w') as f:
                 f.write(s.keymap)
         resp = s.run(req.parse_keymap, s.app)
-        assert resp[0]['output_kwargs']['hotkey'] == 'escape'
+        assert resp[0]['output_kwargs']['hotkey'] == ['escape']
         assert resp[0]['output_kwargs']['command'] == 'window_hide'
-        assert resp[1]['output_kwargs']['hotkey'] == 'f7'
+        assert resp[1]['output_kwargs']['hotkey'] == ['f7']
         assert resp[1]['output_kwargs']['command'] == 'window_show'
         assert resp[1]['output_kwargs']['event_type'] == 'on_key_down'
