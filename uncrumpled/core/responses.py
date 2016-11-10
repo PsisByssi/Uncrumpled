@@ -66,6 +66,7 @@ _UI = ('window_show',
        'system_hotkey_register',
        'system_hotkey_unregister',
        'bind_add',
+       'cmdpane_toggle',
         )
 
 def resp(method, resp_id=None, **kwargs):
