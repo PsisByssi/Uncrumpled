@@ -12,7 +12,7 @@ from contextlib import suppress
 
 import peasoup
 
-import kivygui
+import kivygui # The frontend
 from uncrumpled import core
 from uncrumpled.core.dbapi import create
 from uncrumpled import presenter
@@ -96,7 +96,7 @@ if __name__ == '__main__':
                                  os.path.realpath(os.path.dirname(__file__)),
                                  create=True)
     LOG_FILE = helper.init_file(DATA_DIR, LOG_FILE)
-    peasoup.setup_logger(LOG_FILE)
+    peasoup.setup_logger(LOG_FILE, logging.DEBUG)
 
     # Exception monitoring with sentry
     if not DEVELOPING:
