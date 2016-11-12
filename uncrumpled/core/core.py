@@ -6,6 +6,9 @@ from functools import wraps
 # from uncrumpled.core import requests
 # from uncrumpled.core import dbapi
 
+'''
+resp_id: Run a response in the Presonter with this ID
+'''
 
 def core_request(is_resp_id=False):
     def wrapper(func):
