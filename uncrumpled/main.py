@@ -86,8 +86,8 @@ if __name__ == '__main__':
 
     if len(sys.argv) == 2 and sys.argv[1] == 'developing':
         DEVELOPING = True
-    if DEVELOPING:
-        sys.setrecursionlimit(200)
+    # if DEVELOPING:
+        # sys.setrecursionlimit(200)
 
     # Setup logging in correct location
     helper = MyAppBuilder(main_file=MyAppBuilder.rel_path('__file__'))

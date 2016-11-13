@@ -20,16 +20,12 @@ UI_API = ('status_update',
           'page_close',
           'system_hotkey_register',
           'system_hotkey_unregister',
-          'profile_set_active')
+          'profile_set_active',)
+
 
 # Event types the ui can handle #TODO Generate
 UI_EVENT_TYPES = ('on_key_down', )
 
-
-def make_class_name(string):
-    '''given foo_bar returns FooBar'''
-    parts = string.split('_')
-    return ''.join(x.capitalize() for x in parts)
 
 def traverse(o, tree_types=(list, tuple, GeneratorType)):
     if isinstance(o, tree_types):

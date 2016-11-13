@@ -6,6 +6,15 @@
 from uncrumpled.presenter.presenter import uncrumpled_request
 from uncrumpled.core import requests as req
 
+@uncrumpled_request
+def cmdpane_search(app, query):
+    response = req.cmdpane_search(app, query=query)
+    return response
+
+@uncrumpled_request
+def cmdpane_item_open(app, item):
+    response = req.cmdpane_item_open(app, item=item)
+    return response
 
 @uncrumpled_request
 def profile_create(app, profile):

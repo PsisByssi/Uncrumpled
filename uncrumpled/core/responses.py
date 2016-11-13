@@ -67,7 +67,8 @@ _UI = ('window_show',
        'system_hotkey_unregister',
        'bind_add',
        'cmdpane_toggle',
-        )
+       'cmdpane_search_results',
+       'cmdpane_ui_build')
 
 def resp(method, resp_id=None, **kwargs):
     '''

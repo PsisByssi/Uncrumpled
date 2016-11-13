@@ -108,3 +108,9 @@ class TestHotkeyPressed(Mixin):
         assert 'page_close' in resp[0]
         assert 'window_hide' in resp[1]
         assert s.app.SYSTEM['pages'][1]['is_open'] == False
+
+
+class TestCmdPane(Mixin):
+    def test_search(s):
+        resp = s.run(req.cmdpane_search, s.app, 'work')
+        assert resp

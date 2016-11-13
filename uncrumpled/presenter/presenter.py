@@ -22,7 +22,7 @@ from types import GeneratorType
 from collections import Iterable
 
 from uncrumpled.presenter import responses
-from uncrumpled.presenter import util
+from timstools import make_class_name
 
 
 def uncrumpled_request(func):
@@ -53,7 +53,7 @@ def update_system(app, response):
     takes a update to the system dict from the uncrumpled core
     adds it the the system config in proper format
     '''
-    cls = util.make_class_name(response['resp_id'])
+    cls = make_class_name(response['resp_id'])
     try:
         response_handler = eval('responses.{}(app.SYSTEM, response, app)'
                             .format(cls))

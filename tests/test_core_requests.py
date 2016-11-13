@@ -250,7 +250,6 @@ class TestHotkeys(MixInTestHelper):
         assert response[1]['output_method'] == 'system_hotkey_register'
 
 
-@pytest.mark.a
 class TestUiInit(MixInTestHelper):
     def setup_class(cls):
         super().setup_class(cls)
@@ -455,3 +454,25 @@ class TestConfigReading(MixInTestHelper):
         assert resp[1]['output_kwargs']['hotkey'] == ['f7']
         assert resp[1]['output_kwargs']['command'] == 'window_show'
         assert resp[1]['output_kwargs']['event_type'] == 'on_key_down'
+
+
+class TestCmdPane(MixInTestHelper):
+    '''
+    the passing of these tests required that search data be present..
+    '''
+    def test_search(s):
+        resp = s.run(req.cmdpane_search, s.app, 'work')
+        heading = resp['output_kwargs']['headings'][0]
+        assert heading
+        resp = s.run(req.cmdpane_item_open, s.app, heading)
+        assert resp
+
+        # test opening items
+        resp = s.run(req.cmdpane_item_open, s.app, heading)
+        assert resp['output_method'] == 'cmdpane_ui_build'
+
+        # test a bad search doesn't crash us
+        resp = s.run(req.cmdpane_search, s.app, '000')
+        heading = resp['output_kwargs']['headings']
+        assert not heading
+
