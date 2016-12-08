@@ -74,15 +74,23 @@ def get_kwargs(value):
             return [hotkey], {}
         raise
     else:
-        # String based hotkey with potential kwargs
-        hotkey = values[0]
-        if len(values) > 1:
-            pairs = (x.split('=') for x in values[1:])
+        hotkey = []
+        found_kwargs = False
+        for i, x in enumerate(values):
+            # if still in hotkey
+            if '=' in x and len(x) > 1:
+                found_kwargs = True
+                break
+            else:
+                hotkey.append(x)
+
+        if found_kwargs:
+            pairs = (x.split('=') for x in values[i:])
             kwargs = {k : v for k, v in pairs}
         else:
             kwargs = {}
-        if type(hotkey) == str:
-            hotkey = [hotkey]
+        # if type(hotkey) == str:
+            # hotkey = [hotkey]
         return hotkey, kwargs
 
 '''
@@ -99,11 +107,14 @@ use the importlib module
 def parse_keymap(app):
     '''
     reads the default keymap file, then the user keymap file
+
+    pound #, can be used for comments
     '''
     for file in KEYMAP_FILES:
         data = get_contents(os.path.join(app.data_dir, file))
         for action, keybind in data.items():
             if action not in resp._UI:
+                import pdb;pdb.set_trace()
                 raise Exception('{} not in supported ui'.format(action))
 
             hk, kwargs = get_kwargs(keybind)

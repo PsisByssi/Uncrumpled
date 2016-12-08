@@ -434,26 +434,54 @@ class TestHotkeyPressed(MixInTestHelper):
         assert resp[0]['resp_id'] == 'page_load'
 
 
+@pytest.mark.z
 class TestConfigReading(MixInTestHelper):
-    keymap = """
-             window_hide: escape
-             window_show: f7 event_type=on_key_down
-             """
     def setup_method(s, func):
         super().setup_method(func)
         s.app = EasyUncrumpled()
 
     def test_keymap_parser(s):
+        keymap = """
+                 window_hide: escape
+                 window_show: f7 event_type=on_key_down
+                 """
         # create some dummy keymaps
         for file in KEYMAP_FILES:
             with open(os.path.join(s.app.data_dir, file), 'w') as f:
-                f.write(s.keymap)
+                f.write(keymap)
         resp = s.run(req.parse_keymap, s.app)
         assert resp[0]['output_kwargs']['hotkey'] == ['escape']
         assert resp[0]['output_kwargs']['command'] == 'window_hide'
         assert resp[1]['output_kwargs']['hotkey'] == ['f7']
         assert resp[1]['output_kwargs']['command'] == 'window_show'
         assert resp[1]['output_kwargs']['event_type'] == 'on_key_down'
+
+    def test_multiple_hotkey(s):
+        keymap = """
+                 window_hide: control f7
+                 window_show: control f7 event_type=on_key_down
+                 """
+        for file in KEYMAP_FILES:
+            with open(os.path.join(s.app.data_dir, file), 'w') as f:
+                f.write(keymap)
+        resp = s.run(req.parse_keymap, s.app)
+        assert resp[0]['output_kwargs']['hotkey'] == ['control', 'f7']
+        assert resp[0]['output_kwargs']['command'] == 'window_hide'
+        assert resp[1]['output_kwargs']['hotkey'] == ['control', 'f7']
+        assert resp[1]['output_kwargs']['command'] == 'window_show'
+        assert resp[1]['output_kwargs']['event_type'] == 'on_key_down'
+
+    def test_comment(s):
+        keymap = """
+                 window_hide: control f7
+                 window_show: control f6
+                 # window_show: control f7 event_type=on_key_down
+                 """
+        for file in KEYMAP_FILES:
+            with open(os.path.join(s.app.data_dir, file), 'w') as f:
+                f.write(keymap)
+        resp = s.run(req.parse_keymap, s.app)
+        assert len(resp) == 2
 
 
 class TestCmdPane(MixInTestHelper):
