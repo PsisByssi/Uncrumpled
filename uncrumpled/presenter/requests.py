@@ -7,6 +7,16 @@ from uncrumpled.presenter.presenter import uncrumpled_request
 from uncrumpled.core import requests as req
 
 @uncrumpled_request
+def book_create(app, profile, book, hotkey, active_profile, **kwargs):
+    response = req.book_create(app,
+                               profile=profile,
+                               book=book,
+                               hotkey=hotkey,
+                               active_profile=active_profile,
+                               **kwargs)
+    return response
+
+@uncrumpled_request
 def cmdpane_search(app, query):
     response = req.cmdpane_search(app, query=query)
     return response

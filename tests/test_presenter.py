@@ -114,3 +114,15 @@ class TestCmdPane(Mixin):
     def test_search(s):
         resp = s.run(req.cmdpane_search, s.app, 'work')
         assert resp
+
+
+# Sigh just hitting the end point..
+class TestBook(Mixin):
+    def test_book_create(s):
+        profile = 'p'
+        book = 'b'
+        hotkey = ['h']
+        active_profile = 'p'
+        resp = s.run(req.book_create, s.app, profile, book,
+                     hotkey, active_profile)
+        assert resp
