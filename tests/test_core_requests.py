@@ -442,7 +442,7 @@ class TestConfigReading(MixInTestHelper):
 
     def test_keymap_parser(s):
         keymap = """
-                 window_hide: escape
+                 window_hide: 2
                  window_show: f7 event_type=on_key_down
                  """
         # create some dummy keymaps
@@ -450,7 +450,7 @@ class TestConfigReading(MixInTestHelper):
             with open(os.path.join(s.app.data_dir, file), 'w') as f:
                 f.write(keymap)
         resp = s.run(req.parse_keymap, s.app)
-        assert resp[0]['output_kwargs']['hotkey'] == ['escape']
+        assert resp[0]['output_kwargs']['hotkey'] == [2]
         assert resp[0]['output_kwargs']['command'] == 'window_hide'
         assert resp[1]['output_kwargs']['hotkey'] == ['f7']
         assert resp[1]['output_kwargs']['command'] == 'window_show'
