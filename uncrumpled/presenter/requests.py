@@ -63,4 +63,7 @@ def hotkey_pressed(app, profile, program, hotkey):
 
 def system_get(app):
     '''for debugging'''
-    return ["system_gotten(system={})".format(app.SYSTEM)]
+    from pprint import pprint as pp
+    sys = app.SYSTEM
+    import pdb;pdb.set_trace()
+    # return ["system_gotten(system={})".format(app.SYSTEM)]
