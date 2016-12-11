@@ -146,5 +146,6 @@ class WindowShow(ResponseHandler): pass
 class WindowHide(ResponseHandler): pass
 class WelcomeScreen(ResponseHandler): pass
 class HotkeysLoad(ResponseHandler): pass
+class HotkeysLoadAll(ResponseHandler): pass
 class CmdpaneSearchResults(ResponseHandler): pass
 class CmdpaneItemOpen(ResponseHandler): pass

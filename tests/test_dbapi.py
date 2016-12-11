@@ -61,6 +61,15 @@ class TestHotkeys(MixIn):
         assert not data
 
 
+    def test_hotkey_get(self):
+        rv = dbapi.hotkey_get(self.db, self.profile, self.book)
+        assert not rv
+
+        dbapi.hotkey_create(self.db, self.profile, self.book, self.hotkey)
+        rv = dbapi.hotkey_get(self.db, self.profile, self.book)
+        assert rv == self.hotkey
+
+
 class TestProfile(MixIn):
     def test_profile_create(self):
         rv = dbapi.profile_create(self.db, self.profile)

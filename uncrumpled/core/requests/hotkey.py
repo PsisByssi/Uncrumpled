@@ -31,7 +31,18 @@ def hotkey_update(app, profile, book, hotkey):
 
 
 @core_request(is_resp_id=True)
-def hotkeys_load(app, active_profile):
+def hotkeys_load(app, profile, book, hotkey):
+    '''
+    Load one hotkey
+    '''
+    if not dbapi.hotkey_get(app.db, profile, book):
+        yield resp.noop(key='hotkey_not_found')
+    else:
+        yield resp.resp('system_hotkey_register', hotkey=hotkey)
+
+
+@core_request(is_resp_id=True)
+def hotkeys_load_all(app, active_profile):
     '''
     only use this at startup, init system wide hotkeys for the active profile
     '''

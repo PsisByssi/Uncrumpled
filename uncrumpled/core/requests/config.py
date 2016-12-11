@@ -172,7 +172,7 @@ def ui_init(app, first_run, user_or_token=None, password=None):
     yield resp.resp('profile_set_active', profile=profile)
 
     # Load hotkeys
-    for aresp in req.hotkeys_load(app, profile):
+    for aresp in req.hotkeys_load_all(app, profile):
         yield aresp
 
     # Load keymap

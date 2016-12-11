@@ -220,17 +220,26 @@ class TestHotkeys(MixInTestHelper):
         assert 'hotkey_not_found' in response['output_method']
 
 
-    def test_hotkey_load(s):
-        response = s.run(req.hotkeys_load, s.app, s.profile)
+    def test_hotkeys_load(s):
+        response = s.run(req.hotkeys_load, s.app, s.profile, s.book, s.hotkey)
+        assert 'hotkey_not_found' in response['output_method']
+
+        s.run(req.hotkey_create, s.app, s.profile, s.book, s.hotkey)
+        response = s.run(req.hotkeys_load, s.app, s.profile, s.book, s.hotkey)
+        assert 'system_hotkey_register' in response['output_method']
+
+
+    def test_hotkey_load_all(s):
+        response = s.run(req.hotkeys_load_all, s.app, s.profile)
         assert not response
         dbapi.profile_create(s.app.db, s.profile)
-        response = s.run(req.hotkeys_load, s.app, s.profile)
+        response = s.run(req.hotkeys_load_all, s.app, s.profile)
         assert not response
 
         dbapi.hotkey_create(s.app.db, s.profile, s.book, s.hotkey)
         hotkey2 = ['f11']
         dbapi.hotkey_create(s.app.db, s.profile, s.book, hotkey2)
-        response = s.run(req.hotkeys_load, s.app, s.profile)
+        response = s.run(req.hotkeys_load_all, s.app, s.profile)
 
         assert response[0]['output_method'] == 'system_hotkey_register'
         assert response[0]['output_kwargs']['hotkey'] in (s.hotkey, hotkey2)
@@ -264,10 +273,12 @@ class TestUiInit(MixInTestHelper):
         response = s.run(req.first_run_init, s.app)
         assert 'window_show' == response[0]['output_method']
         assert 'welcome_screen' == response[1]['output_method']
-        assert 'book_create' == response[2]['input_method']
-        assert 'page_create' == response[3]['input_method']
-        assert 'book_create' == response[4]['input_method']
-        assert 'page_load' == response[5]['output_method']
+        assert 'hotkeys_load' == response[2]['input_method']
+        assert 'book_create' == response[3]['input_method']
+        assert 'page_create' == response[4]['input_method']
+        assert 'hotkeys_load' == response[5]['input_method']
+        assert 'book_create' == response[6]['input_method']
+        assert 'page_load' == response[7]['output_method']
 
     def test_first_run_with_profile_active(s):
         s.first_run = True
@@ -275,8 +286,8 @@ class TestUiInit(MixInTestHelper):
         dbapi.hotkey_create(s.app.db, 'default', s.book, s.hotkey)
         dbapi.hotkey_create(s.app.db, s.profile, s.book, s.hotkey)
         response = s.run(req.ui_init, s.app, s.first_run)
-        assert response[7]['output_method'] == 'system_hotkey_register'
-        assert response[8]['output_method'] == 'system_hotkey_register'
+        assert response[9]['output_method'] == 'system_hotkey_register'
+        assert response[10]['output_method'] == 'system_hotkey_register'
 
     def test_all_other_runs(s):
         s.first_run = False
@@ -434,7 +445,6 @@ class TestHotkeyPressed(MixInTestHelper):
         assert resp[0]['resp_id'] == 'page_load'
 
 
-@pytest.mark.z
 class TestConfigReading(MixInTestHelper):
     def setup_method(s, func):
         super().setup_method(func)

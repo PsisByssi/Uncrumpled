@@ -143,6 +143,17 @@ def hotkey_get_all(db, profile):
     return hotkeys
 
 
+def hotkey_get(db, profile, book) -> list:
+    ''' get single hotkey based on profile and book'''
+    cond = "WHERE Profile=='{}' AND Book=='{}'" .format(profile, book)
+    hk = halt.load_column(db, 'Hotkeys', ('Hotkey',), cond)
+    try:
+        hk = halt.objectify((hk[0][0]))
+    except Exception:
+        return []
+    return hk
+
+
 def loose_get_all(db, profile):
     '''returns a list of all loose pages for a given profile'''
     filenames = []

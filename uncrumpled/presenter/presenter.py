@@ -40,7 +40,7 @@ def uncrumpled_request(func):
         for resp in core_responses:
             resp_handler = update_system(app, resp)
             if not resp_handler:
-                raise Exception('Create handler for ' + resp)
+                raise Exception('Create handler for ' + resp['resp_id'])
             _res = resp_handler.partial_ui_update()
             if _res:
                 result.append(_res)
@@ -53,7 +53,10 @@ def update_system(app, response):
     takes a update to the system dict from the uncrumpled core
     adds it the the system config in proper format
     '''
-    cls = make_class_name(response['resp_id'])
+    try:
+        cls = make_class_name(response['resp_id'])
+    except KeyError:
+        import pdb;pdb.set_trace()
     try:
         response_handler = eval('responses.{}(app.SYSTEM, response, app)'
                             .format(cls))

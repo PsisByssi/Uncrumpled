@@ -17,7 +17,7 @@ def book_create(app, profile, book, hotkey, active_profile, **kwargs):
         yield resp.status(key='hotkey_missing', code=0)
     else:
         if profile == active_profile:
-            for aresp in req.hotkeys_reload(app, active_profile, profile):
+            for aresp in req.hotkeys_load(app, profile, book, hotkey):
                 yield aresp
         yield resp.status(key='book_created', code=1, template={'book': book})
 
