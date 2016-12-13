@@ -1,7 +1,5 @@
 '''
-    This module exposes hoykey_pressed
-    It sends signals to load and close pages.
-    It creates new pages if required,
+    This module exposes hoykey_pressed It sends signals to load and close pages.  It creates new pages if required,
 
     REFACTOR IDEAS:
         One idea would be to make the no_process options:
@@ -63,11 +61,6 @@ def page_find(db, profile, book, program, bookopts):
     if a specific page exists, returns that,
     otherwise a general page if one exists
     '''
-    #TODO del
-    global DEVELOPING
-    if DEVELOPING and program in ('python3', 'python'):
-        program = 'uncrumpled'
-
     if bookopts['no_process'] == 'read':
         return
 
@@ -102,6 +95,7 @@ def no_process(app, profile, book, program, hotkey, bookopts):
             # Default Rule
             # So far only the Profile Book checked, and then Book
     no_process = bookopts['no_process']
+    assert no_process in ('read', 'write', 'shelve', 'bookmark')
 
     specific = None
     loose = None
@@ -169,6 +163,9 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
     global DEVELOPING
     if hasattr(app, 'DEVELOPING'):
         DEVELOPING = app.DEVELOPING
+
+    if DEVELOPING and program in ('python3', 'python'):
+        program = 'uncrumpled'
 
     # Find the book that is bound to the hotkey
     hotkey = json.dumps(hotkey)
