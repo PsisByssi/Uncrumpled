@@ -19,8 +19,6 @@ class MixIn():
     loose = None
     def setup_class(cls):
         cls.tdir = tempfile.mkdtemp()
-        cls.db = os.path.join(cls.tdir, 'test.db')
-        dbapi.new_db(cls.db)
 
     def teardown_class(cls):
         shutil.rmtree(cls.tdir)
