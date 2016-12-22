@@ -20,17 +20,21 @@ UI_API = ('status_update',
           'page_close',
           'system_hotkey_register',
           'system_hotkey_unregister',
-          'profile_set_active',)
+          'profile_set_active',
+          'page_settings_view')
 
 
 # Event types the ui can handle #TODO Generate
 UI_EVENT_TYPES = ('on_key_down', )
 
 
-def traverse(o, tree_types=(list, tuple, GeneratorType)):
-    if isinstance(o, tree_types):
-        for value in o:
-            for subvalue in traverse(value, tree_types):
-                yield subvalue
-    else:
-        yield o
+# TODO does this mean the dict should just map files to page_id ?
+def page_id_from_file(pages, file):
+    ''' returns page id or -1'''
+    for page_id, values in pages.items():
+        if file == values['file']:
+            return page_id
+    raise ValueError()
+
+
+

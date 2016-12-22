@@ -25,6 +25,14 @@ def page_update(app, profile, book, program, specific=None, loose=None):
 
 
 @core_request(is_resp_id=True)
+def page_update_from_id(app, page_id, data):
+    if dbapi.page_update_from_id(app.db, page_id, data):
+        yield resp.status(key='page_updated', code=1)
+    else:
+        yield resp.status(key='page_not_found', code=0)
+
+
+@core_request(is_resp_id=True)
 def page_delete(app, profile, book, program, specific=None, loose=None):
     if dbapi.page_delete(app.db, profile, book, program, specific, loose):
         yield resp.status(key='page_deleted', code=1)

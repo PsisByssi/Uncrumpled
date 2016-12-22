@@ -149,3 +149,6 @@ class HotkeysLoad(ResponseHandler): pass
 class HotkeysLoadAll(ResponseHandler): pass
 class CmdpaneSearchResults(ResponseHandler): pass
 class CmdpaneItemOpen(ResponseHandler): pass
+class PageSettingsView(ResponseHandler): pass
+class ApiError(ResponseHandler): pass
+class PageSettingsGotten(ResponseHandler): pass

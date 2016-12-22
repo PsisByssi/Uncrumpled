@@ -115,7 +115,7 @@ def no_process(app, profile, book, program, hotkey, bookopts):
                 assert rowid
                 yield aresp
             # Point the book to the page
-            dbapi.book_update(app.db, book, profile, read_page=rowid)
+            dbapi.book_update(app.db, book, profile, {'read_page': rowid})
             return rowid
         else:
             raise NotImplementedError

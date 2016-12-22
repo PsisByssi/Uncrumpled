@@ -38,9 +38,14 @@ def status(key, code, template=None, **data):
     return to_send
 
 
+def api_error(msg, **kwargs):
+    '''for errors that are usually caused by programmer error'''
+    return resp('api_error', msg=msg, **kwargs)
+
+
 # no operation on the ui, system operations are allowed
 def noop(key=None, **data):
-    '''key is only used for testing, it is a return code'''
+    '''key is only used for testing'''
     return dict({'output_method': key, 'noop': True, 'kwargs': data})
 
 
@@ -68,7 +73,9 @@ _UI = ('window_show',
        'bind_add',
        'cmdpane_toggle',
        'cmdpane_search_results',
-       'cmdpane_ui_build')
+       'cmdpane_ui_build',
+       'page_settings_view',
+       'api_error')
 
 def resp(method, resp_id=None, **kwargs):
     '''

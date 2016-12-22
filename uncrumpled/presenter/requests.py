@@ -4,7 +4,16 @@
 '''
 
 from uncrumpled.presenter.presenter import uncrumpled_request
+from uncrumpled.presenter import util
+from uncrumpled.core import core_request
 from uncrumpled.core import requests as req
+from uncrumpled.core import responses as resp
+
+
+@core_request(is_resp_id=True)
+def api_error(msg, **kwargs):
+    yield resp.api_error(msg, **kwargs)
+
 
 @uncrumpled_request
 def book_create(app, profile, book, hotkey, active_profile, **kwargs):
@@ -60,6 +69,18 @@ def hotkey_pressed(app, profile, program, hotkey):
     system_page = app.SYSTEM['pages']
     response = req.hotkey_pressed(app, profile, program, hotkey, system_page)
     return response
+
+
+@uncrumpled_request
+def page_settings_view(app, file):
+    ''' Return settings for a page '''
+    try:
+        page_id = util.page_id_from_file(app.SYSTEM['pages'], file)
+    except ValueError:
+        return api_error('No file exists...', file=file)
+    response = req.settings_from_pageid(app, page_id, req.SettingSelector.all)
+    return response
+
 
 def system_get(app):
     '''for debugging'''

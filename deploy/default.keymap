@@ -1,2 +1,4 @@
-cmdpane_toggle: 2
+# TODO
+cmdpane_toggle: ctrl spacebar
+page_settings_view: 2
 # window_hide: escape

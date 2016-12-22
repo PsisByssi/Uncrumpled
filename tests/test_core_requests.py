@@ -127,6 +127,7 @@ class TestPage(MixInTestHelper):
         assert 'page created' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] == 1
         assert response['page_id'] == 1
+        assert get_all_data(s.app.db, 'Pages')
 
         response = s.run(req.page_create, s.app, s.profile, s.book,
                                    s.program, s.specific)
@@ -144,8 +145,6 @@ class TestPage(MixInTestHelper):
         response = s.run(req.page_create, s.app, s.profile, s.book,
                                    s.program, s.specific)
 
-
-        data = get_all_data(s.app.db, 'Pages')
         response = s.run(req.page_delete, s.app, s.profile, s.book,
                                     s.program, s.specific, s.loose)
         assert 'page deleted' in response['output_kwargs']['msg'].lower()
@@ -158,24 +157,21 @@ class TestPage(MixInTestHelper):
         assert 'does not exist' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
 
-    def test_page_update(s):
-        response = s.run(req.page_update, s.app, s.profile, s.book,
-                                    'bad_page', s.specific, s.loose)
+
+    def test_update_from_id(s):
+        response = s.run(req.page_update_from_id, s.app, 1, {'k', 'v'})
         assert 'does not exist' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] != 1
-
         response = s.run(req.page_create, s.app, s.profile, s.book,
                                    s.program, s.specific)
-        data = get_all_data(s.app.db, 'Pages')
 
-        response = s.run(req.page_update, s.app, s.profile, s.book,
-                                   s.program, s.specific)
+        page_id = response['page_id']
+        update = {'somekey': 'somevalue'}
+        response = s.run(req.page_update_from_id, s.app, page_id, update)
         assert 'page saved' in response['output_kwargs']['msg'].lower()
         assert response['output_kwargs']['code'] == 1
         data = get_all_data(s.app.db, 'Pages')[0]
-        assert data[1] == s.profile
-        assert data[2] == s.book
-        assert data[3] == s.program
+        assert data[-1] == halt.stringify(update)
 
 
 class TestHotkeys(MixInTestHelper):
@@ -513,4 +509,58 @@ class TestCmdPane(MixInTestHelper):
         resp = s.run(req.cmdpane_search, s.app, '000')
         heading = resp['output_kwargs']['headings']
         assert not heading
+
+
+class TestSettings(MixInTestHelper):
+    def test_setting_failure(s):
+        resp = s.run(req.settings_from_pageid, s.app, 0, req.SettingSelector.all)
+        assert resp['output_kwargs']['code'] == 0
+
+    def test_settings_failure2(s):
+        page_id = dbapi.page_create(s.app.db, s.profile, s.book, s.program, None, None)
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.all)
+        assert resp['output_kwargs']['code'] == 0
+
+    def test_settings_failure3(s):
+        dbapi.profile_create(s.app.db, s.profile)
+        page_id = dbapi.page_create(s.app.db, s.profile, s.book, s.program, None, None)
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.book)
+        assert resp['output_kwargs']['code'] == 0
+
+    def test_settings_failure4(s):
+        dbapi.book_create(s.app.db, s.profile, s.book, s.hotkey)
+        page_id = dbapi.page_create(s.app.db, s.profile, s.book, s.program, None, None)
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.profile)
+        assert resp['output_kwargs']['code'] == 0
+
+    def test_settings_gotten_for_page(s):
+        page_id = dbapi.page_create(s.app.db, s.profile, s.book, s.program, None, None)
+        dbapi.profile_create(s.app.db, s.profile)
+        dbapi.book_create(s.app.db, s.profile, s.book, s.hotkey)
+
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.page)
+        assert resp['output_kwargs']['settings'].get('page_settings')
+
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.page_and_book)
+        assert resp['output_kwargs']['settings'].get('page_settings')
+        assert resp['output_kwargs']['settings'].get('book_settings')
+
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.page_and_profile)
+        assert resp['output_kwargs']['settings'].get('page_settings')
+        assert resp['output_kwargs']['settings'].get('profile_settings')
+
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.book)
+        assert resp['output_kwargs']['settings'].get('book_settings')
+
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.book_and_profile)
+        assert resp['output_kwargs']['settings'].get('book_settings')
+        assert resp['output_kwargs']['settings'].get('profile_settings')
+
+        resp = s.run(req.settings_from_pageid, s.app, page_id, req.SettingSelector.profile)
+        assert resp['output_kwargs']['settings'].get('profile_settings')
+
+    # @pytest.mark.z
+    # def test_settings_update(s):
+        # with pytest.raises(AssertionError):
+            # s.run(req.settings_update, s.app, 0, {})
 

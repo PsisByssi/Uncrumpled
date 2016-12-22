@@ -70,6 +70,7 @@ def _add_hotkey(db, hotkey, profile, book, con=None):
         raise UniqueHotkeyError(str(err))
 
 
+# TODO SWITCH book, profile to profile, book
 def book_delete(db, book, profile):
     if book not in book_get_all(db):
         return False
@@ -82,18 +83,26 @@ def book_delete(db, book, profile):
     return True
 
 
-def book_update(db, book, profile, **to_update):
+def book_update(db, book, profile, to_update):
     '''
     Required a dict that will update columns or mash
     return False if book doesn't exist
     return True if update succesful
     '''
-    if book not in book_get_all(db):
+    if not book_get(db, profile, book):
         return False
-    cond = "where Book == '{0}' and Profile == '{1}'"\
-                    .format(book, profile)
+    cond = "where Book == '{0}' and Profile == '{1}'".format(book, profile)
     halt.update(db, 'Books', to_update, cond, mash=True)
     return True
+
+
+def book_get(db, profile, book):
+    '''get all info for a book'''
+    cond = "where Book == '{0}' and Profile == '{1}'".format(book, profile)
+    res = halt.load_row(db, 'Books', cond)
+    if not res:
+        return False
+    return res[0]
 
 
 def book_get_all(db):
@@ -190,6 +199,7 @@ def page_create(db, profile, book, program, specific, loose):
         return False
 
 
+# TODO LOGIC COMPLETLEY BROKEN.. JUST DEL...
 def page_update(db, profile, book, program, specific, loose):
     rowid = page_rowid_get(db, profile, book, program, specific, loose)
     if rowid:
@@ -200,6 +210,27 @@ def page_update(db, profile, book, program, specific, loose):
     return False
 
 
+def _update(data):
+    if data.get('Program') == None: data['Program'] = util.UNIQUE_NULL
+    if data.get('Specific') == None: data['Specific'] = util.UNIQUE_NULL
+    if data.get('Loose') == None: data['Loose'] = util.UNIQUE_NULL
+    return data
+
+
+def page_update_from_id(db, rowid, data):
+    '''
+    Required a dict that will update columns or mash
+    return False if page doesn't exist
+    return True if update succesful
+    '''
+    if not page_get(db, rowid):
+        return False
+    update = _update(dict(data))
+    cond = "WHERE Id == {}".format(rowid)
+    halt.update(db, 'Pages', update, cond=cond, mash=True)
+    return True
+
+
 def page_delete(db, profile, book, program, specific, loose):
     rowid = page_rowid_get(db, profile, book, program, specific, loose)
     if rowid:
@@ -207,6 +238,14 @@ def page_delete(db, profile, book, program, specific, loose):
         halt.delete(db, 'Pages', cond)
         return True
     return False
+
+
+def page_get(db, rowid):
+    '''get all info  for a page'''
+    res = halt.load_row(db, 'Pages', "WHERE Id == {}".format(rowid))
+    if not res:
+        return False
+    return res[0]
 
 
 def page_get_all(db):
@@ -273,10 +312,31 @@ def profile_get_active(db):
     return profile
 
 
+def profile_get(db, profile):
+    '''Returns all info of a profile'''
+    res = halt.load_row(db, 'Profiles', "WHERE Name == '{}'".format(profile))
+    if not res:
+        return False
+    return res[0]
+
+
 def profile_get_all(db):
     ''' Returns a list of profiles on the system '''
     results = halt.load_column(db, 'Profiles', ('Name',))
     return [x[0] for x in results]
+
+
+def profile_update(db, profile, data):
+    '''
+    Required a dict that will update columns or mash
+    return False if profile doesn't exist
+    return True if update succesful
+    '''
+    if not profile_get(db, profile):
+        return False
+    cond = "WHERE Name == '{}'".format(profile)
+    halt.update(db, 'Profiles', data, cond=cond, mash=True)
+    return True
 
 
 def ufile_create(db, page_id, file):

@@ -9,13 +9,13 @@ import asyncio
 import pytest
 import copy
 
-from uncrumpled.core import Core
+from uncrumpled import core
 from uncrumpled.core import dbapi
 from uncrumpled.core.requests.config import KEYMAP_FILES
 from uncrumpled.presenter import requests as req
 from uncrumpled.presenter.util import system_base
 
-from util import EasyUncrumpled
+from util import EasyUncrumpled, get_all_data
 
 class App(EasyUncrumpled):
     pass
@@ -119,10 +119,23 @@ class TestCmdPane(Mixin):
 # Sigh just hitting the end point..
 class TestBook(Mixin):
     def test_book_create(s):
-        profile = 'p'
-        book = 'b'
-        hotkey = ['h']
         active_profile = 'p'
-        resp = s.run(req.book_create, s.app, profile, book,
-                     hotkey, active_profile)
+        resp = s.run(req.book_create, s.app, s.profile, s.book,
+                     s.hotkey, active_profile)
         assert resp
+
+
+@pytest.mark.z
+class TestSettings(Mixin):
+    def test_settings_view(s):
+        page_id = dbapi.page_create(s.app.db, s.profile, s.book, s.program, None, None)
+        dbapi.profile_create(s.app.db, s.profile)
+        dbapi.book_create(s.app.db, s.profile, s.book, s.hotkey)
+
+        resp = s.run(req.page_settings_view, s.app, page_id)
+        assert 'api_error' in resp
+
+        file = core.util.ufile_create(s.app, page_id)
+        s.app.SYSTEM = {'pages': {page_id: {'is_open': False, 'file': file}}}
+        resp = s.run(req.page_settings_view, s.app, file)
+        assert 'page_settings_view' in resp

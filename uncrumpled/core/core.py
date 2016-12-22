@@ -6,11 +6,14 @@ from functools import wraps
 # from uncrumpled.core import requests
 # from uncrumpled.core import dbapi
 
-'''
-resp_id: Run a response in the Presonter with this ID
-'''
 
 def core_request(is_resp_id=False):
+    '''
+    resp_id: Run a response handler in the Presenter with this ID
+        if the response handler == function name, set to true.
+
+        Is there any reason to ahve this set to false???
+    '''
     def wrapper(func):
         def _core_request(*args, **kwargs):
             data = {}

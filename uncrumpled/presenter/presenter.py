@@ -57,6 +57,8 @@ def update_system(app, response):
         cls = make_class_name(response['resp_id'])
     except KeyError:
         import pdb;pdb.set_trace()
+    except TypeError:
+        import pdb;pdb.set_trace()
     try:
         response_handler = eval('responses.{}(app.SYSTEM, response, app)'
                             .format(cls))
