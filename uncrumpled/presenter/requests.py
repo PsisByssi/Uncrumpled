@@ -68,11 +68,12 @@ def hotkey_pressed(app, profile, program, hotkey):
 
 @uncrumpled_request
 def page_settings_view(app, file):
-    ''' Return settings for a page '''
+    ''' Return settings for a page
+    file must not be a settings file, only uncrumpled files'''
     try:
         page_id = util.page_id_from_file(app.SYSTEM['pages'], file)
     except ValueError:
-        return api_error('No file exists...', file=file)
+        return api_error('Cannot open settings, that file does not exist...', file=file)
     response = req.settings_from_pageid(app, page_id, req.SettingSelector.all)
     return response
 
