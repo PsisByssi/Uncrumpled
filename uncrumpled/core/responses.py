@@ -44,9 +44,13 @@ def api_error(msg, **kwargs):
 
 
 # no operation on the ui, system operations are allowed
-def noop(key=None, **data):
-    '''key is only used for testing'''
-    return dict({'output_method': key, 'noop': True, 'kwargs': data})
+def noop(key=None, resp_id=None, **data):
+    response = resp(key, resp_id, **data)
+    response['noop'] = True
+    return response
+    # if not resp_id:
+        # resp_id = key
+    # return dict({'resp_id': resp_id,'output_method': key, 'noop': True, 'kwargs': data})
 
 
 def noopify(response):

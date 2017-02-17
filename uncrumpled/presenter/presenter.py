@@ -8,12 +8,6 @@
     the return data from the core is modified and added to our system.
     system is a dict containg all the configuration options used
     by the gui.
-
-
-
-    If we use rpc for the api parts of this will remain here
-    specifically the bits related with updating the system
-    The gui will need it's own presenter to communicate with us though.
 '''
 
 import asyncio
