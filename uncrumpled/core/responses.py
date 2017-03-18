@@ -66,7 +66,13 @@ def noopify(response):
         yield aresp
 
 
-_UI = ('window_show',
+_NOOP_METHODS = ['profile_gotten',
+                 'hotkey_created',
+                 'hotkey_taken',
+                 'hotkey_not_found',
+                 'hotkey_deleted',
+                 'hotkey_updated']
+_UI = ['window_show',
        'window_hide',
        'welcome_screen',
        'profile_set_active',
@@ -79,14 +85,15 @@ _UI = ('window_show',
        'cmdpane_search_results',
        'cmdpane_ui_build',
        'page_settings_view',
-       'api_error')
+       'api_error']
+_UI.extend(_NOOP_METHODS)
 
 def resp(method, resp_id=None, **kwargs):
     '''
     :resp_id: a unique id for this response
     used for running arbitrary response handlers,
     the response is unable to call other requests'''
-    assert method in _UI, 'Add method to_ui: ' +method
+    assert method in _UI, 'Add method to _UI: ' +method
     if not resp_id:
         resp_id = method
     return {'resp_id': resp_id, 'output_method': method, 'output_kwargs': kwargs}
