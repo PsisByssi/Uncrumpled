@@ -111,3 +111,18 @@ class TestHotkeyPressed(MixInTestHelper): #TODO simplify the testing helpers..
         s.app.SYSTEM['pages'][s.page_id] = {'is_open': True, 'file': file}
         req.hotkey_pressed(s.app, s.profile, s.program, s.hotkey)
         assert s.app.SYSTEM['pages'][s.page_id]['is_open'] == False
+
+    @pytest.mark.a
+    def test_open_existing(s):
+        dbapi.profile_create(s.app.db, s.profile)
+        kwargs = {'no_process': 'write'}
+        dbapi.book_create(s.app.db, s.profile, s.book, s.hotkey, **kwargs)
+        # s.run(req.page_create, s.app, s.profile, s.book, s.program)
+        response = {'page_id': 1}
+        handler = resp.PageCreate(s.system, response, s.app)
+        handler.add_to_system()
+
+        response = s.run(req.hotkey_pressed, s.app, s.profile, s.program, s.hotkey)
+        assert 'page_load' in response[0]
+        assert s.app.SYSTEM['pages'][1]['is_open'] == True
+        assert 'window_show' in response[1]

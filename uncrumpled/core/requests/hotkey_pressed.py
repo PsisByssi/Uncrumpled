@@ -197,7 +197,7 @@ def hotkey_pressed(app, profile, program, hotkey, system_pages):
             yield False
     # Open or close a page
     else:
-        if system_pages[page_id]['is_open']:
+        if system_pages.get(page_id, {}).get('is_open'):
             yield resp.resp('page_close', page_id=page_id)
             yield resp.resp('window_hide')
         # NOTE, this is a simple work around to make uncrumpled
