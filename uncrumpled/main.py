@@ -78,6 +78,9 @@ class Uncrumpled(MyAppBuilder):
             # move some files in that are required..
             path = os.path.abspath('deploy')
             required = ('default.keymap',)
+            # do not overwrite existing files
+            if os.path.isdir(path):
+                return
             for file in required:
                 shutil.copyfile(os.path.join(path, file),
                                 os.path.join(self.data_dir, file))
