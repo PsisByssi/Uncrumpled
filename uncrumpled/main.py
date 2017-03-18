@@ -56,15 +56,16 @@ class Uncrumpled(MyAppBuilder):
         self.gui.start(self)
 
     def setup_data_dir(self):
-        if not DEVELOPING:
-            return self.get_appdir(portable_path=os.path.dirname(__file__))
-        else:
-            import tempfile
-            # Cleaning up the dir every time just for testing
-            self.data_dir = tempfile.mkdtemp()
-            cleanup = lambda: os.remove(self.data_dir)
-            self.shutdown_cleanup['developing_data_dir'] = cleanup
-            return self.data_dir
+        return self.get_appdir(portable_path=os.path.dirname(__file__))
+        # if not DEVELOPING:
+            # return self.get_appdir(portable_path=os.path.dirname(__file__))
+        # else:
+            # import tempfile
+            # # Cleaning up the dir every time just for testing
+            # self.data_dir = tempfile.mkdtemp()
+            # cleanup = lambda: os.remove(self.data_dir)
+            # self.shutdown_cleanup['developing_data_dir'] = cleanup
+            # return self.data_dir
 
     def setup_config(self, data_dir):
         '''some magic done by peasoup'''
