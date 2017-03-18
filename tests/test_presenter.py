@@ -99,7 +99,7 @@ class TestHotkeyPressed(Mixin):
         dbapi.profile_create(s.app.db, s.profile)
         kwargs = {'no_process': 'write'}
         dbapi.book_create(s.app.db, s.profile, s.book, s.hotkey, **kwargs)
-        resp =s.run(req.hotkey_pressed, s.app, s.profile, s.program, s.hotkey)
+        resp = s.run(req.hotkey_pressed, s.app, s.profile, s.program, s.hotkey)
         assert 'page_load' in resp[0]
         assert s.app.SYSTEM['pages'][1]['is_open'] == True
         assert 'window_show' in resp[1]

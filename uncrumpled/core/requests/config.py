@@ -178,3 +178,6 @@ def ui_init(app, first_run, user_or_token=None, password=None):
     # Load keymap
     for aresp in parse_keymap(app):
         yield aresp
+
+    # Load settings files
+    # should start minimized/or sth etc

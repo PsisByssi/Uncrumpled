@@ -9,6 +9,8 @@ from uncrumpled.core import core_request
 from uncrumpled.core import requests as req
 from uncrumpled.core import responses as core_resp
 
+#TODO SHOULD return a dict of stuff so that these functions
+# are ui or pluging/client agnostic
 
 @uncrumpled_request
 def book_create(app, profile, book, hotkey, active_profile, **kwargs):

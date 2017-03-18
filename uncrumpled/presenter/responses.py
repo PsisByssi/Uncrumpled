@@ -91,6 +91,7 @@ class PageCreate(ResponseHandler):
     def add_to_system(self):
         page_id = self.response['page_id']
         init_text = self.response.get('init_text')
+        # TODO should this be in core/requests/pages ?
         file = core.util.ufile_create(self.app, page_id, init_text)
         self.system['pages'][page_id] = {'is_open': False,
                                         'file': join(self.app.notedir, file)}
@@ -117,6 +118,7 @@ class PageLoad(ResponseHandler):
         existing = self.system['pages'].get(page_id)
         if not existing:
             file = core.util.ufile_get(self.app.db, page_id)
+            assert file
             # TODO rename is_open to is_active
             self.system['pages'][page_id] = {'is_open': True,
                     'file': join(self.app.notedir, file)}
