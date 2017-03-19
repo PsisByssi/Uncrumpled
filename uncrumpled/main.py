@@ -56,9 +56,9 @@ class Uncrumpled(MyAppBuilder):
         self.gui.start(self)
 
     def setup_data_dir(self):
-        return self.get_appdir(portable_path=os.path.dirname(__file__))
+        return self.get_appdir(portable_path=self.rel_path(''))
         # if not DEVELOPING:
-            # return self.get_appdir(portable_path=os.path.dirname(__file__))
+            # return self.get_appdir(portable_path=self.rel_path(''))
         # else:
             # import tempfile
             # # Cleaning up the dir every time just for testing
@@ -76,14 +76,15 @@ class Uncrumpled(MyAppBuilder):
     def dev_stuff(self):
         if DEVELOPING:
             # move some files in that are required..
-            path = os.path.abspath('deploy')
+            path = os.path.join(self.rel_path(''), 'deploy')
             required = ('default.keymap',)
-            # do not overwrite existing files
-            if os.path.isdir(path):
-                return
             for file in required:
-                shutil.copyfile(os.path.join(path, file),
-                                os.path.join(self.data_dir, file))
+                src = os.path.join(path, file)
+                dst = os.path.join(self.data_dir, file)
+                # do not overwrite existing files
+                if os.path.exists(dst):
+                    return
+                shutil.copyfile(src, dst)
 
 
 if __name__ == '__main__':
@@ -96,10 +97,10 @@ if __name__ == '__main__':
     # Setup logging in correct location
     helper = MyAppBuilder(main_file=MyAppBuilder.rel_path('__file__'))
     LOG_FILE = peasoup.add_date(LOG_FILE)
-    DATA_DIR = helper.get_appdir(portable_path=
-                                 os.path.realpath(os.path.dirname(__file__)),
+    DATA_DIR = helper.get_appdir(portable_path=helper.rel_path(''),
                                  create=True)
-    LOG_FILE = helper.init_file(DATA_DIR, LOG_FILE)
+    LOG_DIR = os.path.join(DATA_DIR, 'logs')
+    LOG_FILE = helper.init_file(LOG_DIR, LOG_FILE, create=True)
     peasoup.setup_logger(LOG_FILE, logging.DEBUG)
 
     # Exception monitoring with sentry
