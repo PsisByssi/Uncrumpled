@@ -1,5 +1,6 @@
 
-This readme gives some overview of the Uncrumpled Project (for devs)
+
+# DOCUMENT OUT OF DATE!
 
 Uncrumpled implements the frontend and backend in python
 I have split the logic as much as possible.
@@ -47,7 +48,7 @@ The layers at the top don't know about the layers above.
 
 also we only pass data around to the different layers
 
-app/uncrumpled.py -> kivygui/toplevel.py starts gui
+uncrumpled/main.py -> kivygui/toplevel.py starts gui
 {user clicks} kivygui/xyz.py (view) -> kivygui/presenter/request.py (presenter)
 request.py -> unc/presenter/presenter.py (boundary/interface)
 presetner.py-> unc/core/requests/xyz.py (interactor)
@@ -114,36 +115,3 @@ workbook
 books act then as a vim instance.
 
 6. Uncrumpled can view notes by?
-
-
-## New Language:
-
-# Other options before switching lang
-* cython (compile to c)
-* nuitka (compile to c++)
-* mypy (static type checking)
-* pypy (doesn't work with pygame i.e kivy..)
-
-Requriments for libraries include
-* Automatic updating. (although since we package python we could have a start script and use pyautoupdate)
-* System wide hotkeys
-* Detect currently focused window
-* System Tray (or move this to kivygui...)
-* Asynchronous
-
-* Haxe,
-    **Pros**
-    * Can incrementally upgrade the core
-
-   **Cons**
-   * Bad docs
-
-* Ocaml
-    **Pros**
-    **Cons**
-
-* Nim
-    **Pros**
-    **Cons**
-
-
