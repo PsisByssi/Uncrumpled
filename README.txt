@@ -147,3 +147,5 @@ Requriments for libraries include
     **Cons**
 
 
+
+Join the chat at https://gitter.im/Uncrumpled/Lobby
