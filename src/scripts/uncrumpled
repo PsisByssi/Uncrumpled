@@ -1,0 +1,11 @@
+#!/usr/bin/python3
+
+#   -*- coding: utf-8 -*-
+
+import sys
+
+from uncrumpled.main import start
+
+
+if __name__ == '__main__':
+    sys.exit(start(*sys.argv[1:]))

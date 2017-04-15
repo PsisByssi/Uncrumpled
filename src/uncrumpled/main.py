@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 '''
     Kicks off the Boring Application stuff.
     Settuping up logging etc
@@ -86,9 +87,9 @@ class Uncrumpled(MyAppBuilder):
                     return
                 shutil.copyfile(src, dst)
 
-
-if __name__ == '__main__':
-
+# TODO move this to some cli.py file or sth
+def start():
+    global DEVELOPING
     if len(sys.argv) == 2 and sys.argv[1] == 'developing':
         DEVELOPING = True
     # if DEVELOPING:
@@ -96,11 +97,12 @@ if __name__ == '__main__':
 
     # Setup logging in correct location
     helper = MyAppBuilder(main_file=MyAppBuilder.rel_path('__file__'))
+    global LOG_FILE
     LOG_FILE = peasoup.add_date(LOG_FILE)
-    DATA_DIR = helper.get_appdir(portable_path=helper.rel_path(''),
+    data_dir = helper.get_appdir(portable_path=helper.rel_path(''),
                                  create=True)
-    LOG_DIR = os.path.join(DATA_DIR, 'logs')
-    LOG_FILE = helper.init_file(LOG_DIR, LOG_FILE, create=True)
+    log_dir = os.path.join(data_dir, 'logs')
+    LOG_FILE = helper.init_file(log_dir, LOG_FILE, create=True)
     peasoup.setup_logger(LOG_FILE, logging.DEBUG)
 
     # Exception monitoring with sentry
@@ -119,4 +121,8 @@ if __name__ == '__main__':
             with suppress(Exception):
                 raven_client.captureException()
         # restarter = peasoup.Restarter()
+
+if __name__ == '__main__':
+    start()
+
 

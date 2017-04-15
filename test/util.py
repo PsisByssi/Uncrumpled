@@ -28,7 +28,7 @@ class EasyUncrumpled(peasoup.AppBuilder):
     def __init__(self):
         pardir = os.path.abspath(join(os.path.dirname(__file__), os.path.pardir))
         os.chdir(pardir)
-        super().__init__(main_file=join(pardir, 'uncrumpled', 'main.py'))
+        super().__init__(main_file=join(pardir, 'src', 'uncrumpled', 'main.py'))
         self.setup_dirs()
         self.core = Core(db=self.db)
         self.DEVELOPING = True

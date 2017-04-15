@@ -71,7 +71,8 @@ class TestUiInit(Mixin):
     def setup_class(cls):
         super().setup_class(cls)
         # move some files in that are required..
-        path = os.path.abspath('deploy')
+        base = os.path.abspath(os.path.dirname(__file__))
+        path = os.path.join(base, 'deploy')
         for file in KEYMAP_FILES:
             shutil.copyfile(os.path.join(path, file),
                             os.path.join(cls.app.data_dir, file))

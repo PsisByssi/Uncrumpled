@@ -14,7 +14,8 @@ zipped src
 *.*prof
 *.egg-info/
 build/
-.*tags
+tags*
 tags
 /img
+target/
 
