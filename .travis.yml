@@ -1,0 +1,32 @@
+sudo: True
+
+before_install:
+  - chmod a+x .ci/ubuntu14.04_install_deps.sh
+
+install:
+  # System Dependancies
+  - . .ci/ubuntu14.04_install_deps.sh
+  # Build tool
+  - pip install pybuilder
+  # TODO this should be in the build.py
+  - pip install -e src
+
+before_script:
+  # tests requiring a GUI need xvfb (X Virtual Framebuffer)
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+
+script:
+  - pyb appimage
+
+matrix:
+  fast_finish: true
+  include:
+    - language: python
+      python: 3.5
+      os: linux
+      dist: trusty
+
+notifications:
+  - email: false

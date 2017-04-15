@@ -1,0 +1,26 @@
+init:
+  - SET PATH=C:\\Python35;C:\\Python35\\Scripts;%PATH%
+  - python --version
+  - python -c "import struct; print(struct.calcsize('P') * 8)"
+  - pip install --upgrade pip wheel setuptools
+
+install:
+  # Build tool
+  - pip install pybuilder
+  # Permission denied error when pybuilder installs this..
+  - pip install pybuilder_pytest
+  # System Dependancies
+  - powershell .\.ci\windows_32_install_deps.ps1
+  # TODO this should be in the build.py
+  - pip install -e src
+
+build_script:
+  # This will install all deps, test and generate an exe
+  - pyb_ verify
+  # - pyb_ pyinstaller
+
+  #artifacts:
+  # Archive the generated packages in the ci.appveyor.com build report.
+  #- path: dist\*
+
+

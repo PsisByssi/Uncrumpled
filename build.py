@@ -2,12 +2,12 @@ import os
 from os.path import join
 from sys import platform
 
-import requests
-from plumbum import cmd
 
 LINUX = True if 'linux' in platform else False
+WINDOWS = True if platform == 'win32' else False
 
 def zsh_run(msg, file, *args):
+    from plumbum import cmd
     # logger.info('appimage: ' + msg)
     path = join(os.path.dirname(__file__), file)
     if args:
@@ -20,6 +20,7 @@ def zsh_run(msg, file, *args):
 A_X = 0o777
 
 def dl_and_save(name ,url):
+    import requests
     r = requests.get(url)
     with open(name, 'wb') as file:
         file.write(r.content)
@@ -56,49 +57,51 @@ from pybuilder.core import use_plugin, init, task, depends
 use_plugin("python.core")
 use_plugin('copy_resources')
 
-# use_plugin("python.unittest")
+use_plugin('pypi:pybuilder_pytest')
 use_plugin("python.install_dependencies")
 # use_plugin("python.flake8")
 # use_plugin("python.coverage")
 
-@init
-def init_wget(project):
-    project.plugin_depends_on("plumbum")
-
+# TODO pull from setup.py
 name = "uncrumpled"
 version = "0.1.0"
 # default_task = "publish"
 default_task = "appimage"
 
-@init
-def set_properties(project):
-    project.depends_on('pyyaml')
-    project.depends_on('yamlordereddictloader')
-    project.depends_on('psutil')
-    project.depends_on('peasoup')
-    project.depends_on('appdirs')
-    project.depends_on('tkquick')
-    project.depends_on('Pillow')
-    project.depends_on('halt')
-    project.depends_on('timstools')
-    project.depends_on('piefuzz')
-    project.depends_on('system_hotkey') # TODO this dep sohuld autopull in deps
+def _set_requirements(project):
+    # FIXME unfortunatley build_depends_on doesn't work, have to do a install_dependencies first..
+    # FIXME install_dependencies command fails as it batch downloads..
+    # because of KIVY has an explicit check for cython...
+    project.plugin_depends_on('halt')
+    project.plugin_depends_on('peasoup')
+    project.plugin_depends_on('pyyaml')
+
+    project.plugin_depends_on('yamlordereddictloader')
+    project.plugin_depends_on('timstools')
+    project.plugin_depends_on('piefuzz')
+    project.plugin_depends_on('system_hotkey') # TODO this dep sohuld autopull in deps
                                         # http://python-packaging.readthedocs.io/en/latest/dependencies.html
     if LINUX:
-        project.depends_on('xcffib')
+        project.plugin_depends_on('xcffib')
          # TODO tmp pypi package, until an offical one comes out https://github.com/BurntSushi/xpybutil/issues/10
-        project.depends_on('uncrumpled_xpybutil')
+        project.plugin_depends_on('uncrumpled_xpybutil')
+        project.plugin_depends_on('uncrumpled_kivy') # TODO recycleboxlayout not included in kivy pypi...
+    elif WINDOWS:
+        project.plugin_depends_on('pypiwin32')
 
     # kivygui deps
-    project.depends_on('uncrumpled_kivygui')
+    project.plugin_depends_on('uncrumpled_kivygui')
     # https://kivy.org/docs/installation/installation-linux.html
-    project.depends_on('Cython')
-    project.depends_on('uncrumpled_kivy') # TODO recycleboxlayout not included in kivy pypi...
+    project.plugin_depends_on('Cython')
     # TODO tmp pypi package https://github.com/reclosedev/async_gui/issues/6
-    project.depends_on('uncrumpled_async_gui')
+    project.plugin_depends_on('uncrumpled_async_gui')
+
+@init
+def set_properties(project):
+    _set_requirements(project)
 
     project.set_property("dir_source_main_python", "src/uncrumpled")
-    project.set_property("dir_source_unittest_python", "test")
+    project.set_property("dir_source_pytest_python", "test")
     project.set_property("dir_source_main_scripts", "src/scripts")
 
     project.set_property("appimage_arch", "x86-64")
@@ -106,7 +109,8 @@ def set_properties(project):
 @init
 def init_appimage(project):
     project.plugin_depends_on("virtualenv")
-    # project.plugin_depends_on("plumbum")
+    project.plugin_depends_on("plumbum")
+    project.plugin_depends_on("requests")
 
     # a script file to start it all off
     project.set_property_if_unset("main_entry_point", project.name)
@@ -116,6 +120,8 @@ def init_appimage(project):
     project.set_property_if_unset("appimage_icon", "/usr/share/icons/hicolor/256x256/apps/logview.png")
     project.set_property_if_unset("appimage_arch", "i686")
 
+# TODO appimage is required to be installed as a virtualenv??
+# TODO option to use existing virtualenv
 @task
 @depends('package')
 def appimage(project, logger):
@@ -153,26 +159,12 @@ def appimage(project, logger):
             else:
                 logger.warning('appimage: Expected either y or n, recieved: ' + ans)
                 raise Exception
-    # pyver = 'python{}.{}'.format(sys.version_info.major,
-                                # sys.version_info.minor)
+
     os.chdir(appimgdir)
-    # with local.cwd(appimgdir):
     shutil.rmtree('usr', ignore_errors=True)
     logger.info('appimage: creating virtualenv in AppDir')
     cmd.virtualenv('usr')
-        # os.makedirs('usr/share/pyshared')
-        # root_site_packages = '/usr/lib/'
-        # os.makedirs('usr/lib/'+pyver'/site-packages')
-        # site_packages =
-        # for p in site.getsitepackages():
-            # if 'site-packages' in p:
-                # site_packages = p
-                # break
-        # else:
-            # raise Exception('site packages not found...')
 
-    # TODO make a flag to use existing venv or a new one..
-    # will probably fail if we have development libs installed with pip install -e
     logger.info('appimage: Installing python libraries')
     pip = local['usr/bin/pip']
     for dep in project.dependencies:
@@ -186,6 +178,7 @@ def appimage(project, logger):
 
     # TODO can we reorganize our projecet so that this isn't necessary?
     # Installs our own projet using pip -install -e
+    # TODO make a flag for this option, also a flag to use a virtualenv from a path
     src_setup = join(project.basedir,
                      os.path.dirname(project.get_property("dir_source_main_python")),
                      'setup.py')
@@ -193,7 +186,7 @@ def appimage(project, logger):
     shutil.copy(src_setup, dst_setup)
     pip['install', '-e', appimgdir]()
 
-    # TODO insert bangline for correct python version
+    # TODO auto insert bangline for correct python version
     logger.info('appimage: create symlink to script files')
     script_dir = join(name_lower, 'scripts')
     for script in os.listdir(script_dir):
