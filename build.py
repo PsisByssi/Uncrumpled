@@ -85,6 +85,7 @@ def _set_requirements(project):
         project.plugin_depends_on('xcffib')
          # TODO tmp pypi package, until an offical one comes out https://github.com/BurntSushi/xpybutil/issues/10
         project.plugin_depends_on('uncrumpled_xpybutil')
+        project.plugin_depends_on('uncrumpled_kivy') # TODO recycleboxlayout not included in kivy pypi...
     elif WINDOWS:
         project.plugin_depends_on('pypiwin32')
 
@@ -92,7 +93,6 @@ def _set_requirements(project):
     project.plugin_depends_on('uncrumpled_kivygui')
     # https://kivy.org/docs/installation/installation-linux.html
     project.plugin_depends_on('Cython')
-    project.plugin_depends_on('uncrumpled_kivy') # TODO recycleboxlayout not included in kivy pypi...
     # TODO tmp pypi package https://github.com/reclosedev/async_gui/issues/6
     project.plugin_depends_on('uncrumpled_async_gui')
 

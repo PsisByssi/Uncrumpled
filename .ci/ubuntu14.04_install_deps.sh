@@ -26,7 +26,6 @@ sudo apt-get install -y \
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 git checkout a5862d4b9cc5f57ef83174c0d714bfb485094a4f # PINNED
 ~/.fzf/install --bin # generate binary only
-# ln -s ~/.fzf/bin/fzf /usr/bin/fzf
 export PATH="$HOME/.fzf/bin:$PATH"
 
 #####

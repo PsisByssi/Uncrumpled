@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from codecs import open
 
 setup(
-    name = 'unrumpled',
+    name = 'uncrumpled',
     version='0.1.0',
     description = 'Uncrumpled ',
     author='timothy eichler',
