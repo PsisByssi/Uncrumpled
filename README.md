@@ -2,6 +2,9 @@
 Uncrumpled
 ==========
 
+[![Build Status](https://travis-ci.org/nudebandage/uncrumpled.svg)](https://travis-ci.org/nudebandage/uncrumpled)
+[![Build status](https://ci.appveyor.com/api/projects/status/4ns3a3igynq6juv0?svg=true)](https://ci.appveyor.com/project/tim83455/uncrumpled)
+
 - [Introduction](#introduction)
 - [Installing](#installing)
 - [Usage](#usage)
