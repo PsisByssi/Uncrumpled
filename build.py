@@ -4,6 +4,7 @@ from sys import platform
 
 
 LINUX = True if 'linux' in platform else False
+WINDOWS = True if platform == 'win32' else False
 
 def zsh_run(msg, file, *args):
     from plumbum import cmd
@@ -84,6 +85,8 @@ def _set_requirements(project):
         project.plugin_depends_on('xcffib')
          # TODO tmp pypi package, until an offical one comes out https://github.com/BurntSushi/xpybutil/issues/10
         project.plugin_depends_on('uncrumpled_xpybutil')
+    elif WINDOWS:
+        project.plugin_depends_on('pypiwin32')
 
     # kivygui deps
     project.plugin_depends_on('uncrumpled_kivygui')
