@@ -260,7 +260,7 @@ class TestUiInit(MixInTestHelper):
         super().setup_class(cls)
         # move some files in that are required..
         base = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(base, 'deploy')
+        path = os.path.join(base, os.pardir, 'src', 'uncrumpled', 'deploy')
         for file in KEYMAP_FILES:
             shutil.copyfile(os.path.join(path, file),
                             os.path.join(cls.app.data_dir, file))

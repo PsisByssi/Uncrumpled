@@ -14,7 +14,7 @@ import sqlite3
 import dbtools
 from timstools import safe_string
 
-from util import rand_str
+from util import rand_str, symlink, readlink
 
 
 def make_bookname(name, widgettype=None, profile=None, db=None):
@@ -165,11 +165,11 @@ def create_link(app, uncpath, filepath, db=None):
     cur = dbtools.loadItColumn('Symlink', table='Pages',
             condition="where Name == '{}'".format(get_my_link))
 
-    # new_link_path = os.readlink(os.path.join(app.symlinkdir,
+    # new_link_path = readlink(os.path.join(app.symlinkdir,
                                             # cur.fetchone()[0]))
 
     name = cur.fetchone()[0]
-    new_link_path = os.readlink(os.path.join(app.symlinkdir,
+    new_link_path = readlink(os.path.join(app.symlinkdir,
                                             name))
     cur = dbtools.loadItColumn('Symlink', table='Pages',
             condition="where Name == '{}'".format(update_my_link))
@@ -179,9 +179,9 @@ def create_link(app, uncpath, filepath, db=None):
     print('from ', get_my_link)
     print('from ', filepath)
     print('updating {} from {} -> {}'.format(old_link_name, name, new_link_path))
-    print('the symlink from the other file ', os.readlink(os.path.join(app.symlinkdir, old_link_name)))
+    print('the symlink from the other file ', readlink(os.path.join(app.symlinkdir, old_link_name)))
     os.remove(update_me)
-    os.symlink(new_link_path, update_me)
+    symlink(new_link_path, update_me)
 
 
 def make_filepath(app, page, overwrite=False):
@@ -202,7 +202,7 @@ def make_filepath(app, page, overwrite=False):
     dest = os.path.join(app.symlinkdir, symlink_name)
     fname = _rand_name_in_dir(app.notedir) + '.txt'
     src = os.path.join(app.notedir, fname)
-    os.symlink(src, dest)
+    symlink(src, dest)
     app.uac_bypass(src, create=True, overwrite=overwrite)
     return symlink_name
 
